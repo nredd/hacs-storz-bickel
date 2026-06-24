@@ -2,11 +2,8 @@
   "name": "HA ${localWorkspaceFolderBasename} Dev Container",
   "image": "mcr.microsoft.com/devcontainers/base:debian",
   // Lifecycle hooks — execution order on first creation:
-  //   onCreateCommand → updateContentCommand → postCreateCommand → postStartCommand → postAttachCommand
   // On subsequent starts (container stopped/restarted):
-  //   postStartCommand → postAttachCommand
   // On client re-attach (container already running):
-  //   postAttachCommand only
   //
   // Each hook script sources .devcontainer/hooks/<name>.{pre,post}.sh when present.
   //
@@ -19,7 +16,6 @@
   // Runs on every container creation — installs all dependencies.
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   // Runs on every client attach — detects fresh blueprints and triggers initialization.
-  "postAttachCommand": "bash .devcontainer/post-attach.sh",
   "containerEnv": {
     // Python runtime variables — must be set for ALL Python processes, including those spawned
     // by VS Code extensions (Pylance, test runner, Ruff) that never go through our shell scripts.

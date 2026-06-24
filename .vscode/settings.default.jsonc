@@ -14,10 +14,7 @@
   "markdown.validate.enabled": false,
   "markdown.validate.fileLinks.enabled": "ignore",
   "markdown.validate.fragmentLinks.enabled": "ignore",
-  "python.analysis.autoImportCompletions": true,
-  "python.analysis.diagnosticMode": "workspace",
   "python.defaultInterpreterPath": "/home/vscode/ha-venv/bin/python",
-  "python.linting.pylintEnabled": false,
   "python.terminal.activateEnvironment": true,
   "python.terminal.activateEnvInCurrentTerminal": true,
   // .devcontainer/.env uses Bash syntax (sourced by setup scripts) — not a Python dotenv file.
@@ -40,6 +37,7 @@
     "!include_dir_merge_named scalar",
     "!input scalar"
   ],
+  "ty.enable": true,
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.codeActionsOnSave": {
@@ -48,19 +46,16 @@
     }
   },
   "[yaml]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.defaultFormatter": "redhat.vscode-yaml",
     "editor.formatOnSave": true
   },
   "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
   },
   "[jsonc]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
   },
   "[jsontranslation]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": false
   },
 

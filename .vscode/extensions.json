@@ -1,11 +1,9 @@
 {
   "recommendations": [
-    "charliermarsh.ruff",
+    "astral-sh.ruff",
+    "astral-sh.ty",
     "davidanson.vscode-markdownlint",
-    "EditorConfig.EditorConfig",
-    "esbenp.prettier-vscode",
     "ms-python.python",
-    "ms-python.vscode-pylance",
     "ms-vscode-remote.remote-containers",
     "redhat.vscode-yaml",
     "tamasfe.even-better-toml"

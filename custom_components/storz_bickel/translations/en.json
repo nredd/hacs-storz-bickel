@@ -1,0 +1,50 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "bluetooth_confirm": {
+        "description": "Do you want to set up {name}?\n\nWhile Home Assistant is connected, the Storz & Bickel app cannot connect to this device at the same time."
+      },
+      "user": {
+        "description": "Select a Storz & Bickel device to set up. Make sure it is powered on, in range, and not connected to the Storz & Bickel app.",
+        "data": {
+          "address": "Device"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This device is already configured",
+      "no_devices_found": "No Storz & Bickel devices found nearby. Make sure the device is on, in range, and not connected to another app.",
+      "not_supported": "This device is not a supported Storz & Bickel vaporizer"
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "heater": { "name": "Heating" },
+      "pump": { "name": "Pump" },
+      "connection": { "name": "Connection" }
+    },
+    "number": {
+      "led_brightness": { "name": "Display brightness" },
+      "auto_shutoff_minutes": { "name": "Auto shutoff timer" },
+      "boost_temperature": { "name": "Boost temperature" }
+    },
+    "sensor": {
+      "temperature": { "name": "Temperature" },
+      "battery": { "name": "Battery" },
+      "total_runtime": { "name": "Total runtime" },
+      "hours_of_operation": { "name": "Hours of operation" },
+      "minutes_of_operation": { "name": "Minutes of operation" },
+      "heater_runtime": { "name": "Heater runtime" },
+      "battery_charge_time": { "name": "Battery charge time" },
+      "serial_number": { "name": "Serial number" },
+      "firmware_version": { "name": "Firmware version" },
+      "ble_firmware_version": { "name": "Bluetooth firmware version" }
+    },
+    "switch": {
+      "pump": { "name": "Pump" },
+      "vibration": { "name": "Vibration" },
+      "auto_shutoff_enabled": { "name": "Auto shutoff" }
+    }
+  }
+}

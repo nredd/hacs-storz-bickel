@@ -1,0 +1,21 @@
+TODOs:
+- `.vscode`:
+    - Replace pyright -> astral/ty
+    - Replace pylance  -> astral/ty server
+    - Remove excessive extension recommendations (vi / editor stuff )
+    - Update `tasks.json` to use ty for type checking
+- `script/`:
+    - Use `ty` for type checking
+- Remove unused boilerplate stuff/dotfiles (?):
+    - `node_modules`
+    - `requirements_dev.txt`
+    - `.prettier*`
+    - `.markdownlint*`
+    - `.yamllint` (handled by `schemas` ?)
+    - `.release-please-config.json` (needed ?)
+
+- Update `README.md`:
+  - Mention upstream template repo location 
+- Update `docs/` for completeness
+- ** NEED Comprehensive `tests/` suite **
+- Rename `hacs-volcano` -> `hacs-storz-and-bickel` (?)

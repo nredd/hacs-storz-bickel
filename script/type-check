@@ -2,8 +2,7 @@
 
 # script/type-check: Run type checking tools
 #
-# Runs Pyright type checker to validate type annotations and catch type-related
-# issues. Uses 'basic' type checking mode.
+# Runs ty (Astral) to validate type annotations and catch type-related issues.
 #
 # Usage:
 #   ./script/type-check
@@ -25,12 +24,7 @@ run_hook "type-check" "pre"
 
 log_header "Running type checking tools"
 
-export PATH="$PWD/node_modules/.bin:$PATH"
-if ! command -v pyright >/dev/null 2>&1; then
-    die "Node.js dependencies not installed. Run: npm ci"
-fi
-
-pyright
+uv run ty check
 
 run_hook "type-check" "post"
 log_success "Type checking completed"

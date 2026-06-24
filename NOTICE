@@ -1,0 +1,45 @@
+hacs-volcano — Home Assistant integration for Storz & Bickel BLE vaporizers
+Copyright (c) 2026 Nicholas Redd
+
+This product includes work derived from and informed by the following projects:
+
+1. Chuffnugget/volcano_integration  (MIT License, Copyright (c) 2025 Chuffnugget)
+   https://github.com/Chuffnugget/volcano_integration
+   The Volcano Hybrid BLE connection, read/write, and notification handling in
+   custom_components/storz_bickel/api/devices/volcano.py were adapted from this
+   project's bluetooth_coordinator.py, reworked to use Home Assistant's
+   bleak-retry-connector connection management and this project's device
+   abstraction.
+
+   The MIT License text from the upstream project is reproduced below.
+
+2. firsttris/reactive-volcano-app  (no published license — used as a protocol reference only)
+   https://github.com/firsttris/reactive-volcano-app
+   The reverse-engineered GATT service/characteristic UUIDs, byte layouts, command
+   opcodes, and bit masks for the Volcano, Venty, Veazy, and Crafty devices were
+   used as a protocol specification. No source code from this project was copied;
+   the parsing logic in custom_components/storz_bickel/api/ is an original Python
+   implementation.
+
+--------------------------------------------------------------------------------
+MIT License (Chuffnugget/volcano_integration)
+
+Copyright (c) 2025 Chuffnugget
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
