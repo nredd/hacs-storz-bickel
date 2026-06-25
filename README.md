@@ -63,6 +63,29 @@ uv run ty check              # type-check
 uv run pytest                # tests
 ```
 
+`script/smoke` runs the full check + test suite, exactly as CI does. CI runs `script/smoke`
+**inside the project's devcontainer image** (via [`devcontainers/ci`](https://github.com/devcontainers/ci)),
+so local development and CI share one environment. Open the repo in the devcontainer (VS Code /
+Codespaces) to get the same toolchain.
+
+### Live BLE check (host-only)
+
+`tests/live_ble.py` is a real-hardware check: it scans for a nearby Storz & Bickel device, connects
+over BLE, reads its identity/state, and disconnects (it never actuates the heater or pump). Run it
+from your **host** machine (not the devcontainer — a Linux container on macOS has no path to the
+host's Bluetooth radio):
+
+```bash
+script/test-live
+```
+
+It is a plain script, **not** part of the pytest suite, on purpose: the
+`pytest-homeassistant-custom-component` harness patches the platform to Linux, which forces `bleak`
+onto the BlueZ backend and breaks real CoreBluetooth scanning on macOS. Running standalone keeps the
+real platform backend. `uv` auto-syncs the normal project env. With no device in range it exits 0
+(clean skip); it exits non-zero only if a device is found but the connect/read fails. On macOS, grant
+your terminal/IDE the Bluetooth permission on first run.
+
 ## Attribution
 
 The Volcano Hybrid BLE implementation is adapted from the MIT-licensed

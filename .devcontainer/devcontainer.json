@@ -34,7 +34,12 @@
     "PYTHONDONTWRITEBYTECODE": "1",
     // Point uv to the named volume cache mount (avoids Docker creating ~/.cache as root).
     // Must be set here so it reaches every process (extensions, uv, hass) from container start.
-    "UV_CACHE_DIR": "/home/vscode/uv-cache"
+    "UV_CACHE_DIR": "/home/vscode/uv-cache",
+    // Mark this as a dev container for tooling that branches on it. VS Code sets this
+    // automatically, but the Dev Containers CLI (used in CI) does not — without it,
+    // script/setup/bootstrap picks the workspace .local/ha-venv path while
+    // script/setup/setup expects the external $HOME/ha-venv, breaking postCreate.
+    "REMOTE_CONTAINERS": "true"
   },
   "features": {
     "ghcr.io/devcontainers/features/python:1": {
@@ -44,9 +49,6 @@
       "version": "lts"
     },
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainer-community/devcontainer-features/yq:1": {
-      "version": "latest"
-    },
     "ghcr.io/devcontainers-extra/features/apt-packages:1": {
       "packages": [
         "autoconf",

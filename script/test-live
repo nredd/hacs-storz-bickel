@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# script/test-live: Run the live BLE check against real hardware (HOST ONLY)
+#
+# Scans for a nearby Storz & Bickel device, connects over BLE, reads its identity
+# and state, then disconnects. It performs NO writes — the heater/pump are never
+# actuated. Exits 0 when it connects+reads or cleanly skips (no adapter/device);
+# exits non-zero only when a device was found but the connect/read failed.
+#
+# This MUST run on the host, not inside the devcontainer: a Linux Docker container
+# on macOS has no path to the Mac's Bluetooth radio. It runs tests/live_ble.py as a
+# plain script (NOT pytest) on purpose — the pytest-homeassistant-custom-component
+# harness patches the platform to Linux, which forces bleak onto the BlueZ backend
+# and breaks real CoreBluetooth scanning. uv auto-syncs the normal project env.
+#
+# Usage:
+#   ./script/test-live
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR/.."
+
+# shellcheck source=script/.lib/output.sh
+source "$SCRIPT_DIR/.lib/output.sh"
+
+run_hook "test-live" "pre"
+
+# Refuse to run inside the devcontainer/Codespaces — no host Bluetooth radio there.
+if [[ -n "${REMOTE_CONTAINERS:-}" || -n "${CODESPACES:-}" ]]; then
+    log_error "script/test-live cannot run inside the devcontainer"
+    log_info "Docker on macOS has no path to the host Bluetooth radio."
+    log_info "Open the project on your host machine and run: script/test-live"
+    exit 1
+fi
+
+require_command uv "https://docs.astral.sh/uv/getting-started/installation/"
+
+log_header "Running live BLE check"
+log_info "Power on a Storz & Bickel device and keep it in range."
+log_info "On first run, grant your terminal/IDE the macOS Bluetooth permission."
+echo ""
+
+# `uv run` auto-syncs the project env (importing the integration needs the full HA
+# stack). Run as a plain script so the real CoreBluetooth backend is used.
+uv run python tests/live_ble.py
+
+run_hook "test-live" "post"
+
+log_success "Live BLE test completed"

@@ -77,54 +77,6 @@ Reads the canonical version from `manifest.json`.
 ./script/version --check      # Verify manifest.json matches .release-please-manifest.json
 ```
 
-### `script/release-notes`
-
-Generates AI-enhanced release notes using [GitHub Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli). Requires an active Copilot subscription and `gh auth login`.
-
-```bash
-# Preview enhanced notes on stdout
-./script/release-notes
-
-# Update the open release-please PR body with enhanced notes
-./script/release-notes --apply
-
-# Launch Copilot CLI interactively with context pre-loaded
-./script/release-notes --interactive
-```
-
-**How it works:**
-
-1. Finds the open release-please PR (`autorelease: pending` label)
-2. Collects rich context since the last tag:
-   - Full commit details (subject, body, per-commit file stats)
-   - Compact code diff for user-facing paths (sensors, config flow, services, translations)
-   - Net file change list as source of truth
-   - Revert commit list as chronology hints
-3. Builds a detailed prompt with audience definition, jargon rules, and file impact guidance
-4. Sends everything to Copilot CLI via stdin (avoids shell-escaping issues with large prompts)
-5. Outputs the result to stdout, or updates the PR body with `--apply`
-
-**`--interactive` mode** writes the full prompt and context to `.ai-scratch/release-notes-context.md` and launches a Copilot CLI session so you can iterate manually.
-
-**Skip a commit from release notes** by adding a trailer to the commit body:
-
-```text
-Release-Notes: skip
-```
-
-or:
-
-```text
-User-Impact: none
-```
-
-**Environment variables:**
-
-| Variable                 | Default             | Description                     |
-| ------------------------ | ------------------- | ------------------------------- |
-| `COPILOT_MODEL`          | `claude-sonnet-4.6` | AI model to use                 |
-| `RELEASE_NOTES_DIFF_MAX` | `8000`              | Max bytes for code diff context |
-
 ## Typical Release Workflow
 
 ### Minimal (automated only)
@@ -136,21 +88,6 @@ git commit -m "feat(sensor): add air quality index sensor"
 # 2. Push to main — release-please opens/updates PR automatically
 
 # 3. When ready to release: review the PR on GitHub, then merge it
-```
-
-### With enhanced release notes
-
-```bash
-# 1. Check the current version and open PR
-./script/version
-
-# 2. Generate Copilot-enhanced release notes and review
-./script/release-notes
-
-# 3. If satisfied, update the PR body
-./script/release-notes --apply
-
-# 4. Merge the PR on GitHub
 ```
 
 ## GitHub Repository Setup (One-Time)
@@ -169,7 +106,7 @@ In **Settings → Actions → General → Workflow permissions**, set:
 In **Settings → Branches → Add branch ruleset** (or classic protection rule for `main`):
 
 - **Require a pull request before merging** — prevents direct pushes
-- **Require status checks to pass** — add `Ruff`, `Hassfest validation`, `HACS validation` as required checks
+- **Require status checks to pass** — add `Smoke (devcontainer)`, `Hassfest validation`, `HACS validation` as required checks
 - This ensures the release PR can only be merged when CI is green, giving you a reliable safety net
 
 With required status checks in place, a release PR with failing CI simply cannot be merged accidentally.
@@ -189,4 +126,3 @@ If you want an additional manual gate, you can add a required label (`release: a
 | `.release-please-manifest.json`        | Current version tracked by release-please                        |
 | `CHANGELOG.md`                         | Auto-generated, committed in the same commit as the version bump |
 | `script/version`                       | Local version utility                                            |
-| `script/release-notes`                 | Local Copilot CLI release notes enhancement                      |

@@ -25,7 +25,7 @@ This is a Home Assistant custom integration that was generated from a blueprint 
 
 **Devcontainer CLI tools:** The devcontainer provides common agent-facing CLI tools including `bat`, `delta`/`git-delta`, `eza`, `fd`/`fdfind`, `fzf`, `http`/`httpie`, `hyperfine`, `ipython`, `jq`, `jo`, `mlr`/`miller`, `rg`/`ripgrep`, `shellcheck`, `shfmt`, `sponge`, `sqlite3`, `tree`, `yq`, and `yamllint`. Prefer these explicit container tools over assuming a VS Code extension exposes an equivalent CLI on `PATH`.
 
-**CLI compatibility notes:** Some commands are available via compatibility aliases because Debian package names differ from what agents often expect. Prefer `bat`, `fd`, `git-delta`, `httpie`, `ipython`, `miller`, and `ripgrep` as stable spellings. `yq` is installed as the Mike Farah variant, so standard `yq eval`/`yq e` syntax is expected.
+**CLI compatibility notes:** Some commands are available via compatibility aliases because Debian package names differ from what agents often expect. Prefer `bat`, `fd`, `git-delta`, `httpie`, `ipython`, `miller`, and `ripgrep` as stable spellings.
 
 **Start Home Assistant:**
 
@@ -164,7 +164,7 @@ As an AI agent, **aim for Silver or Gold Quality Scale** when generating code:
 
 **JSON:** 2 spaces, no trailing commas, no comments
 
-**Validation:** Run `script/check` before committing (runs type-check + lint + spell)
+**Validation:** Run `script/check` before committing (runs type-check + lint)
 
 **hassfest validation:** Run `script/hassfest` to validate against Home Assistant standards
 
@@ -394,7 +394,7 @@ See `.github/instructions/blueprint.repairs.instructions.md` for comprehensive p
 **Before committing, always run the full suite:**
 
 ```bash
-script/check      # Full validation: type-check + lint-check + spell-check
+script/check      # Full validation: type-check + lint-check
 ```
 
 **After editing specific file types, use the targeted script — it is faster:**
@@ -430,7 +430,6 @@ script/type-check   # Pyright type errors — no auto-fix ever, always a manual 
 script/lint         # Format + fix all types (Python, Shell, Markdown)
 script/python       # Ruff format + ruff check --fix  (Python only)
 script/shell        # shfmt -w                        (Shell only)
-script/spell        # codespell --write-changes        (spelling)
 script/markdown     # Prettier --write + markdownlint  (Markdown only)
 ```
 
@@ -443,7 +442,6 @@ script/yaml-check   # yamllint                           (YAML only)
 script/shell-check  # shfmt -d + shellcheck              (Shell only)
 script/markdown-check # Prettier --check + markdownlint  (Markdown only)
 script/type-check   # Pyright                            (types only)
-script/spell-check  # codespell                          (spelling only)
 script/test         # pytest                             (tests only)
 ```
 
@@ -458,7 +456,6 @@ script/test         # pytest                             (tests only)
 | **shellcheck**        | Shell script static analysis | ❌ manual            |
 | **Prettier**          | Markdown formatting          | ✅ `script/markdown` |
 | **markdownlint-cli2** | Markdown structure + style   | ✅ `script/markdown` |
-| **codespell**         | Spelling in code + docs      | ✅ `script/spell`    |
 | **pytest**            | Unit + integration tests     | ❌ n/a               |
 
 References: [Ruff rules](https://docs.astral.sh/ruff/rules/) · [Pyright docs](https://microsoft.github.io/pyright/)

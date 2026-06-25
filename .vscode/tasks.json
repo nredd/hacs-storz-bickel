@@ -75,9 +75,9 @@
       "problemMatcher": []
     },
     {
-      "label": "Install Requirements",
+      "label": "Sync Dependencies (uv sync)",
       "type": "shell",
-      "command": "${command:python.interpreterPath} -m pip install -r requirements.txt",
+      "command": "./script/uv-sync",
       "group": "build",
       "presentation": {
         "reveal": "always",
@@ -86,21 +86,10 @@
       "problemMatcher": []
     },
     {
-      "label": "Install Dev Requirements",
+      "label": "Smoke (Full CI)",
       "type": "shell",
-      "command": "${command:python.interpreterPath} -m pip install -r requirements_dev.txt",
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Install Test Requirements",
-      "type": "shell",
-      "command": "${command:python.interpreterPath} -m pip install -r requirements_test.txt",
-      "group": "build",
+      "command": "./script/smoke",
+      "group": "test",
       "presentation": {
         "reveal": "always",
         "panel": "new"

@@ -2,9 +2,11 @@
 
 # script/bootstrap: Install/update all dependencies required to run the project
 #
-# Bootstraps the development environment by installing system packages,
-# setting up uv package manager, creating virtual environment, and installing
-# Python dependencies including Home Assistant core and development tools.
+# Bootstraps the development environment: sets up the uv package manager, creates
+# the virtual environment, and installs all Python dependencies via `uv sync`
+# against the locked pyproject.toml/uv.lock. This is the single provisioning path
+# shared by local development, the devcontainer, and CI. Home Assistant is pulled
+# in transitively by pytest-homeassistant-custom-component (see the `dev` group).
 #
 # Usage:
 #   ./script/setup/bootstrap
@@ -19,10 +21,6 @@ cd "$SCRIPT_DIR/../.."
 
 # shellcheck source=script/.lib/output.sh
 source "$SCRIPT_DIR/../.lib/output.sh"
-# shellcheck source=script/.lib/download.sh
-source "$SCRIPT_DIR/../.lib/download.sh"
-# shellcheck source=script/.lib/ha_version.sh
-source "$SCRIPT_DIR/../.lib/ha_version.sh"
 
 # Load environment overrides in two layers (later layers win):
 #   .devcontainer/.env       — project-level defaults, committed to the repo
@@ -174,82 +172,16 @@ EOF
     set -e
 fi
 
-log_header "Installing development dependencies"
-uv pip install --requirement requirements_dev.txt
-
-log_header "Installing test dependencies"
-uv pip install --requirement requirements_test.txt
-
-log_header "Installing runtime dependencies"
-if [[ -s requirements.txt ]] && grep -qv '^#' requirements.txt | grep -q '[^[:space:]]'; then
-    uv pip install --requirement requirements.txt
-else
-    log_info "No runtime dependencies defined (this is normal for blueprints)"
-fi
-
-if [[ -f requirements.local.txt ]]; then
-    log_header "Installing local extra dependencies (requirements.local.txt)"
-    uv pip install --requirement requirements.local.txt
-fi
-
-if [[ -n "${HA_VERSION:-}" ]]; then
-    # Explicit HA_VERSION from environment — use exactly as specified
-    resolve_ha_version HA_VERSION "$HA_VERSION"
-else
-    # Read from hacs.json: treat YEAR.MONTH.0 as YEAR.MONTH so the latest
-    # stable patch is installed (hacs.json records minimum version, not pin)
-    HA_VERSION=$(grep '"homeassistant"' hacs.json | head -1 | sed 's/.*"homeassistant"\s*:\s*"\([^"]*\)".*/\1/')
-    if [[ -z "$HA_VERSION" ]]; then
-        log_error "HA_VERSION not set and could not be determined from hacs.json"
-        exit 1
-    fi
-    if [[ "$HA_VERSION" =~ ^[0-9]{4}\.[0-9]+\.0$ ]]; then
-        HA_VERSION="${HA_VERSION%.*}" # "2026.4.0" → "2026.4" → latest patch
-    fi
-    resolve_ha_version HA_VERSION "$HA_VERSION"
-fi
-
-HA_CORE_BASE_URL="https://raw.githubusercontent.com/home-assistant/core/${HA_VERSION}"
-
-# Recreate the venv if the installed HA version no longer matches the target.
-# This handles the cached-volume case: the venv persists across rebuilds, so without
-# this check an HA version bump would silently run on the old installation.
-# The marker file ($VENV_PATH/.ha-version) is written after a successful install below.
-HA_VERSION_MARKER="$VENV_PATH/.ha-version"
-if [[ -f "$HA_VERSION_MARKER" ]]; then
-    CACHED_HA_VERSION=$(cat "$HA_VERSION_MARKER")
-    if [[ "$CACHED_HA_VERSION" != "$HA_VERSION" ]]; then
-        log_warning "HA version changed ($CACHED_HA_VERSION → $HA_VERSION) — recreating virtual environment"
-        # Use find instead of rm -rf: the path may be a named Docker volume mount point
-        # which cannot be removed itself — only its contents can be deleted.
-        find "$VENV_PATH" -mindepth 1 -delete
-        uv venv "$VENV_PATH"
-        # shellcheck source=/dev/null
-        source "$VENV_PATH/bin/activate"
-    fi
-fi
-
-log_header "Installing Home Assistant ${HA_VERSION} runtime dependencies"
-mkdir -p "/tmp/homeassistant"
-_download "${HA_CORE_BASE_URL}/homeassistant/package_constraints.txt" "/tmp/homeassistant/package_constraints.txt" # constraints for requirements files
-_download "${HA_CORE_BASE_URL}/requirements.txt" "/tmp/requirements.txt"                                           # required by requirements_all.txt
-_download "${HA_CORE_BASE_URL}/requirements_all.txt" "/tmp/requirements_all.txt"
-uv pip install --requirement "/tmp/requirements_all.txt"
-
-log_header "Installing Home Assistant ${HA_VERSION} test dependencies"
-_download "${HA_CORE_BASE_URL}/requirements_test_pre_commit.txt" "/tmp/requirements_test_pre_commit.txt" # required by requirements_test.txt
-_download "${HA_CORE_BASE_URL}/requirements_test.txt" "/tmp/requirements_test.txt"
-uv pip install --requirement "/tmp/requirements_test.txt"
-
-log_header "Installing Home Assistant ${HA_VERSION} core"
-uv pip install "homeassistant==${HA_VERSION}"
-
-# Record the installed HA version so bootstrap can detect version changes on subsequent runs.
-echo "$HA_VERSION" >"$HA_VERSION_MARKER"
-
-set +e
-rm -rf /tmp/requirements*.txt /tmp/homeassistant/ || log_warning "Failed to clean up temporary files"
-set -e
+log_header "Installing dependencies (uv sync --locked)"
+# Install everything from the locked environment into the venv resolved above.
+# UV_PROJECT_ENVIRONMENT points uv at our chosen venv (e.g. the DevContainer's
+# named-volume venv) instead of the default in-tree .venv. uv installs the default
+# groups, including `dev` (which re-includes the slim `live` group), so the full
+# dev/test/Home Assistant environment is provisioned in one step. uv also removes
+# anything not in the lockfile, so an HA version bump in uv.lock is applied here
+# without the old per-version marker dance.
+export UV_PROJECT_ENVIRONMENT="$VENV_PATH"
+uv sync --locked
 
 # Only install pre-commit hooks in local development, not in CI
 # GITHUB_ACTIONS is always set to "true" in GitHub Actions environments

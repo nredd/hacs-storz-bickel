@@ -1,10 +1,5 @@
 {
   "features": {
-    "ghcr.io/devcontainer-community/devcontainer-features/yq:1": {
-      "version": "1.0.3",
-      "resolved": "ghcr.io/devcontainer-community/devcontainer-features/yq@sha256:9e73b838a7d821f89c8020b51c2605aa4174811d152c70b43f2e98a0f8413d35",
-      "integrity": "sha256:9e73b838a7d821f89c8020b51c2605aa4174811d152c70b43f2e98a0f8413d35"
-    },
     "ghcr.io/devcontainers-extra/features/apt-packages:1": {
       "version": "1.0.6",
       "resolved": "ghcr.io/devcontainers-extra/features/apt-packages@sha256:55c54412112da81b9381e470cdbbe55278564950d1ff536ce925b1e8e096babd",

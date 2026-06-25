@@ -10,7 +10,7 @@
 - **Title:** Storz & Bickel
 - **Class prefix:** `StorzBickel`
 - **Main code:** `custom_components/storz_bickel/`
-- **Validate:** `script/check` (type-check + lint-check + spell-check)
+- **Validate:** `script/check` (type-check + lint-check)
 - **Start HA:** `./script/develop` (kills existing, starts on port 8123)
 - **Force restart:** `pkill -f "hass --config" || true && pkill -f "debugpy.*5678" || true && ./script/develop`
 
@@ -25,7 +25,7 @@ Use these exact identifiers throughout the codebase. Never hardcode different va
 Before considering any coding task complete, the following **must** pass:
 
 ```bash
-script/check      # Runs type-check + lint-check + spell-check
+script/check      # Runs type-check + lint-check
 ```
 
 Generate code that passes these checks on first run. As an AI agent, you should produce higher quality code than manual development. Aim for zero validation errors.
@@ -95,7 +95,7 @@ Generate code that passes these checks on first run. As an AI agent, you should 
 
 **Devcontainer CLI tools:** The devcontainer provides common agent-facing CLI tools including `bat`, `delta`/`git-delta`, `eza`, `fd`/`fdfind`, `fzf`, `http`/`httpie`, `hyperfine`, `ipython`, `jq`, `jo`, `mlr`/`miller`, `rg`/`ripgrep`, `shellcheck`, `shfmt`, `sponge`, `sqlite3`, `tree`, `yq`, and `yamllint`. Prefer these explicit container tools over assuming a VS Code extension exposes an equivalent CLI on `PATH`.
 
-**CLI compatibility notes:** Some commands are available via compatibility aliases because Debian package names differ from what agents often expect. Prefer `bat`, `fd`, `git-delta`, `httpie`, `ipython`, `miller`, and `ripgrep` as stable spellings. `yq` is installed as the Mike Farah variant, so standard `yq eval`/`yq e` syntax is expected.
+**CLI compatibility notes:** Some commands are available via compatibility aliases because Debian package names differ from what agents often expect. Prefer `bat`, `fd`, `git-delta`, `httpie`, `ipython`, `miller`, and `ripgrep` as stable spellings.
 
 **Start Home Assistant:**
 

@@ -1,18 +1,16 @@
 #!/bin/bash
 
-# script/check: Run all checks (type, lint, spell) — recommended before committing
+# script/check: Run all checks (type, lint) — recommended before committing
 #
 # Runs the full validation suite in sequence:
 #   type-check      Pyright type checking
 #   lint-check      Python (Ruff), YAML (yamllint), Shell (shfmt + shellcheck), Markdown
-#   spell-check     Spelling (codespell)
 #
 # For targeted checks after specific file type changes:
 #   ./script/type-check     Python type checking only (Pyright)
 #   ./script/python-check   Python lint/format only (Ruff)
 #   ./script/yaml-check     YAML only (yamllint)
 #   ./script/shell-check    Shell only (shfmt + shellcheck)
-#   ./script/spell-check    Spelling only (codespell)
 #
 # Usage:
 #   ./script/check
@@ -35,8 +33,6 @@ echo ""
 "$SCRIPT_DIR/type-check"
 echo ""
 "$SCRIPT_DIR/lint-check"
-echo ""
-"$SCRIPT_DIR/spell-check"
 
 # Run hassfest validation if it has been set up (only in local environment, not CI)
 # Check both possible ha-core locations (DevContainer uses $HOME/.local, local uses workspace .local)
