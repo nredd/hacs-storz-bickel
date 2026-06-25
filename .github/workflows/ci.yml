@@ -39,6 +39,13 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      - name: Ensure host gitconfig exists for the devcontainer bind mount
+        # devcontainer.json bind-mounts ${localEnv:HOME}/.gitconfig; on a fresh CI
+        # runner that file doesn't exist and Docker refuses to mount a missing path,
+        # failing `devcontainer up`. An empty file satisfies the mount — setup-git.sh
+        # tolerates an empty host gitconfig.
+        run: touch "$HOME/.gitconfig"
+
       - name: Log in to GitHub Container Registry
         # Needed to push the cached image on main, and to authenticate cacheFrom
         # pulls on same-repo PRs. Skipped for fork PRs, whose token can't access
