@@ -10,7 +10,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from custom_components.storz_bickel.api.devices import CraftyDevice, SBDevice, VeazyDevice, VentyDevice, VolcanoDevice
+from custom_components.storz_bickel.api.devices import (
+    CraftyDevice,
+    SBDevice,
+    VeazyDevice,
+    VentyDevice,
+    VolcanoDevice,
+)
 from custom_components.storz_bickel.api.discovery import detect_device_type
 from custom_components.storz_bickel.api.exceptions import (
     StorzBickelCharacteristicError,
@@ -18,7 +24,11 @@ from custom_components.storz_bickel.api.exceptions import (
     StorzBickelError,
     StorzBickelNotConnectedError,
 )
-from custom_components.storz_bickel.api.models import DeviceCapabilities, DeviceType, SBDeviceState
+from custom_components.storz_bickel.api.models import (
+    DeviceCapabilities,
+    DeviceType,
+    SBDeviceState,
+)
 
 if TYPE_CHECKING:
     from bleak.backends.device import BLEDevice

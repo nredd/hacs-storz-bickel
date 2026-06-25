@@ -46,7 +46,11 @@ async def async_get_config_entry_diagnostics(
             "coordinator": {
                 "last_update_success": coordinator.last_update_success,
                 "update_interval": str(coordinator.update_interval),
-                "last_exception": (repr(coordinator.last_exception) if coordinator.last_exception else None),
+                "last_exception": (
+                    repr(coordinator.last_exception)
+                    if coordinator.last_exception
+                    else None
+                ),
             },
             "state": asdict(device.state),
         },

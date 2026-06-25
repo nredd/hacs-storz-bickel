@@ -16,7 +16,11 @@ from homeassistant.components import bluetooth
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from custom_components.storz_bickel.api import SBDeviceState, StorzBickelConnectionError, StorzBickelError
+from custom_components.storz_bickel.api import (
+    SBDeviceState,
+    StorzBickelConnectionError,
+    StorzBickelError,
+)
 from custom_components.storz_bickel.const import DOMAIN, LOGGER
 
 if TYPE_CHECKING:

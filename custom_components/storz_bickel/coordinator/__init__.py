@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
-from custom_components.storz_bickel.coordinator.base import StorzBickelDataUpdateCoordinator
+from custom_components.storz_bickel.coordinator.base import (
+    StorzBickelDataUpdateCoordinator,
+)
 
 __all__ = ["StorzBickelDataUpdateCoordinator"]

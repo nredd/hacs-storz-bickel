@@ -36,18 +36,24 @@ class StorzBickelConfigFlowHandler(ConfigFlow, domain=DOMAIN):
         # address -> (advertised name, detected device type)
         self._discovered: dict[str, tuple[str | None, DeviceType]] = {}
 
-    async def async_step_bluetooth(self, discovery_info: BluetoothServiceInfoBleak) -> ConfigFlowResult:
+    async def async_step_bluetooth(
+        self, discovery_info: BluetoothServiceInfoBleak
+    ) -> ConfigFlowResult:
         """Handle a device discovered over Bluetooth."""
         await self.async_set_unique_id(discovery_info.address)
         self._abort_if_unique_id_configured()
 
-        device_type = detect_device_type(discovery_info.name, discovery_info.service_uuids)
+        device_type = detect_device_type(
+            discovery_info.name, discovery_info.service_uuids
+        )
         if device_type is None:
             return self.async_abort(reason="not_supported")
 
         self._discovery_info = discovery_info
         self._device_type = device_type
-        self.context["title_placeholders"] = {"name": discovery_info.name or device_type.model_name}
+        self.context["title_placeholders"] = {
+            "name": discovery_info.name or device_type.model_name
+        }
         return await self.async_step_bluetooth_confirm()
 
     async def async_step_bluetooth_confirm(
@@ -60,7 +66,9 @@ class StorzBickelConfigFlowHandler(ConfigFlow, domain=DOMAIN):
 
         name = self._discovery_info.name or self._device_type.model_name
         if user_input is not None:
-            return self._create_entry(self._discovery_info.address, self._discovery_info.name, self._device_type)
+            return self._create_entry(
+                self._discovery_info.address, self._discovery_info.name, self._device_type
+            )
 
         self._set_confirm_only()
         return self.async_show_form(
@@ -68,7 +76,9 @@ class StorzBickelConfigFlowHandler(ConfigFlow, domain=DOMAIN):
             description_placeholders={"name": name},
         )
 
-    async def async_step_user(self, user_input: dict[str, str] | None = None) -> ConfigFlowResult:
+    async def async_step_user(
+        self, user_input: dict[str, str] | None = None
+    ) -> ConfigFlowResult:
         """Handle manual setup by selecting a nearby device."""
         if user_input is not None:
             address = user_input[CONF_ADDRESS]
@@ -98,7 +108,9 @@ class StorzBickelConfigFlowHandler(ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({vol.Required(CONF_ADDRESS): vol.In(options)}),
         )
 
-    def _create_entry(self, address: str, name: str | None, device_type: DeviceType) -> ConfigFlowResult:
+    def _create_entry(
+        self, address: str, name: str | None, device_type: DeviceType
+    ) -> ConfigFlowResult:
         """Create the config entry for a selected device."""
         return self.async_create_entry(
             title=name or device_type.model_name,

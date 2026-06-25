@@ -17,7 +17,11 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.loader import async_get_loaded_integration
 
 from custom_components.storz_bickel.api import DeviceType, create_device
-from custom_components.storz_bickel.const import CONF_DEVICE_TYPE, DOMAIN, POLL_INTERVAL_SECONDS
+from custom_components.storz_bickel.const import (
+    CONF_DEVICE_TYPE,
+    DOMAIN,
+    POLL_INTERVAL_SECONDS,
+)
 from custom_components.storz_bickel.coordinator import StorzBickelDataUpdateCoordinator
 from custom_components.storz_bickel.data import StorzBickelData
 
@@ -48,7 +52,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: StorzBickelConfigEntry) 
         raise ConfigEntryNotReady(msg)
 
     device = create_device(device_type, ble_device)
-    coordinator = StorzBickelDataUpdateCoordinator(hass, entry, device, POLL_INTERVAL_SECONDS)
+    coordinator = StorzBickelDataUpdateCoordinator(
+        hass, entry, device, POLL_INTERVAL_SECONDS
+    )
     entry.runtime_data = StorzBickelData(
         device=device,
         coordinator=coordinator,

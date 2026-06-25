@@ -22,7 +22,9 @@ if TYPE_CHECKING:
     from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
     from custom_components.storz_bickel.api import SBDeviceState
-    from custom_components.storz_bickel.coordinator import StorzBickelDataUpdateCoordinator
+    from custom_components.storz_bickel.coordinator import (
+        StorzBickelDataUpdateCoordinator,
+    )
     from custom_components.storz_bickel.data import StorzBickelConfigEntry
 
 PARALLEL_UPDATES = _PARALLEL_UPDATES
@@ -89,7 +91,10 @@ class StorzBickelConnectivitySensor(StorzBickelEntity, BinarySensorEntity):
 
     def __init__(self, coordinator: StorzBickelDataUpdateCoordinator) -> None:
         """Initialize the connectivity sensor."""
-        super().__init__(coordinator, BinarySensorEntityDescription(key="connection", translation_key="connection"))
+        super().__init__(
+            coordinator,
+            BinarySensorEntityDescription(key="connection", translation_key="connection"),
+        )
 
     @property
     def available(self) -> bool:

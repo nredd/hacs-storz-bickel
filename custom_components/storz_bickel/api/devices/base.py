@@ -15,7 +15,10 @@ from typing import TYPE_CHECKING
 from bleak.exc import BleakError
 from bleak_retry_connector import BleakClientWithServiceCache, establish_connection
 
-from custom_components.storz_bickel.api.exceptions import StorzBickelConnectionError, StorzBickelNotConnectedError
+from custom_components.storz_bickel.api.exceptions import (
+    StorzBickelConnectionError,
+    StorzBickelNotConnectedError,
+)
 from custom_components.storz_bickel.api.models import DeviceCapabilities, SBDeviceState
 from custom_components.storz_bickel.const import LOGGER
 
@@ -80,7 +83,9 @@ class SBDevice(ABC):
 
     # --- Push callbacks ---------------------------------------------------- #
 
-    def register_callback(self, callback: Callable[[SBDeviceState], None]) -> Callable[[], None]:
+    def register_callback(
+        self, callback: Callable[[SBDeviceState], None]
+    ) -> Callable[[], None]:
         """Register a listener for state updates.
 
         Args:
@@ -197,11 +202,15 @@ class SBDevice(ABC):
         except BleakError:
             return None
 
-    async def _write(self, uuid: str, payload: bytes = b"", *, response: bool = False) -> None:
+    async def _write(
+        self, uuid: str, payload: bytes = b"", *, response: bool = False
+    ) -> None:
         """Write bytes to a GATT characteristic."""
         await self._require_client().write_gatt_char(uuid, payload, response=response)
 
-    async def _start_notify(self, uuid: str, handler: Callable[[BleakGATTCharacteristic, bytearray], None]) -> None:
+    async def _start_notify(
+        self, uuid: str, handler: Callable[[BleakGATTCharacteristic, bytearray], None]
+    ) -> None:
         """Subscribe to notifications for a characteristic and track it."""
         await self._require_client().start_notify(uuid, handler)
         self._notify_uuids.append(uuid)
@@ -263,4 +272,6 @@ class SBDevice(ABC):
 
     def _unsupported(self, feature: str) -> StorzBickelConnectionError:
         """Return an error describing an unsupported feature for this device."""
-        return StorzBickelConnectionError(f"{self.device_type} does not support {feature}")
+        return StorzBickelConnectionError(
+            f"{self.device_type} does not support {feature}"
+        )

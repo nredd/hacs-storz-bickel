@@ -13,7 +13,9 @@ if TYPE_CHECKING:
     from homeassistant.loader import Integration
 
     from custom_components.storz_bickel.api import SBDevice
-    from custom_components.storz_bickel.coordinator import StorzBickelDataUpdateCoordinator
+    from custom_components.storz_bickel.coordinator import (
+        StorzBickelDataUpdateCoordinator,
+    )
 
 
 type StorzBickelConfigEntry = ConfigEntry[StorzBickelData]
