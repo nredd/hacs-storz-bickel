@@ -124,6 +124,9 @@ ignore = [
     "T20",     # print() allowed in scripts
     "INP001",  # scripts are not a package
 ]
+"custom_components/storz_bickel/api/devices/base.py" = [
+    "ARG002",  # non-abstract stub methods preserve public-API parameter names
+]
 
 [tool.ruff.lint.flake8-import-conventions.extend-aliases]
 voluptuous = "vol"

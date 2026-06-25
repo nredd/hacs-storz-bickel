@@ -21,7 +21,7 @@ TO_REDACT = {CONF_ADDRESS, "address", "serial_number"}
 
 
 async def async_get_config_entry_diagnostics(
-    hass: HomeAssistant,  # noqa: ARG001 - required signature
+    _hass: HomeAssistant,
     entry: StorzBickelConfigEntry,
 ) -> dict[str, Any]:
     """Return diagnostics for a config entry."""

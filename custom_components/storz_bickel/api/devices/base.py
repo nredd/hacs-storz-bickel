@@ -246,27 +246,27 @@ class SBDevice(ABC):
     # base implementations raise, but keep the full signatures so callers (and the
     # type checker) see a consistent interface across every device family.
 
-    async def async_set_pump(self, *, on: bool) -> None:  # noqa: ARG002 - interface stub
+    async def async_set_pump(self, *, on: bool) -> None:
         """Turn the pump on or off (Volcano only)."""
         raise self._unsupported("pump")
 
-    async def async_set_vibration(self, *, on: bool) -> None:  # noqa: ARG002 - interface stub
+    async def async_set_vibration(self, *, on: bool) -> None:
         """Enable or disable vibration feedback."""
         raise self._unsupported("vibration")
 
-    async def async_set_led_brightness(self, percent: int) -> None:  # noqa: ARG002 - interface stub
+    async def async_set_led_brightness(self, percent: int) -> None:
         """Set the LED/LCD brightness as a percentage (0-100)."""
         raise self._unsupported("led_brightness")
 
-    async def async_set_auto_shutoff(self, *, on: bool) -> None:  # noqa: ARG002 - interface stub
+    async def async_set_auto_shutoff(self, *, on: bool) -> None:
         """Enable or disable the auto-shutoff timer."""
         raise self._unsupported("auto_shutoff")
 
-    async def async_set_auto_shutoff_minutes(self, minutes: int) -> None:  # noqa: ARG002 - interface stub
+    async def async_set_auto_shutoff_minutes(self, minutes: int) -> None:
         """Set the auto-shutoff duration in minutes."""
         raise self._unsupported("auto_shutoff")
 
-    async def async_set_boost_temperature(self, celsius: float) -> None:  # noqa: ARG002 - interface stub
+    async def async_set_boost_temperature(self, celsius: float) -> None:
         """Set the boost target temperature (portable devices)."""
         raise self._unsupported("boost_temperature")
 
