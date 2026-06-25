@@ -127,8 +127,9 @@ ignore = [
     "ARG001",  # pytest fixtures are often requested by name without being referenced
 ]
 # tests/live_ble.py is a standalone CLI runner (not a pytest test): print() is its
-# output, and its bleak/integration imports must follow the sys.path bootstrap.
-"tests/live_ble.py" = ["T20"]
+# output, and the interleaved success/failure returns read more clearly inline than
+# split into a try/else block.
+"tests/live_ble.py" = ["T20", "TRY300"]
 "script/*" = [
     "T20",     # print() allowed in scripts
     "INP001",  # scripts are not a package

@@ -27,10 +27,10 @@ import sys
 # Make the repo root importable when invoked as ``python tests/live_ble.py``.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from bleak import BleakScanner  # noqa: E402
-from bleak.exc import BleakError  # noqa: E402
+from bleak import BleakScanner
+from bleak.exc import BleakError
 
-from custom_components.storz_bickel.api import (  # noqa: E402
+from custom_components.storz_bickel.api import (
     StorzBickelConnectionError,
     create_device,
     detect_device_type,
@@ -65,7 +65,9 @@ async def _run() -> int:
         return 0
 
     device_type, ble_device = match
-    print(f"Found {device_type} at {ble_device.address} ({ble_device.name}) — connecting...")
+    print(
+        f"Found {device_type} at {ble_device.address} ({ble_device.name}) — connecting..."
+    )
     device = create_device(device_type, ble_device)
     try:
         await device.async_connect()
