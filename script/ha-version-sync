@@ -62,10 +62,14 @@ def assert_no_hardcoded_ha_version(path: str) -> None:
 
 
 # ── pytest-homeassistant-custom-component ───────────────────────────────────
-req_text = Path("requirements_test.txt").read_text(encoding="utf-8")
-m = re.search(r"^pytest-homeassistant-custom-component==([^\s#]+)", req_text, re.MULTILINE)
+lock_text = Path("uv.lock").read_text(encoding="utf-8")
+m = re.search(
+    r'^name = "pytest-homeassistant-custom-component"\nversion = "([^"]+)"',
+    lock_text,
+    re.MULTILINE,
+)
 if not m:
-    fail("pytest-homeassistant-custom-component pin not found in requirements_test.txt")
+    fail("pytest-homeassistant-custom-component not found in uv.lock")
 pkg_version = m.group(1)
 
 with urllib.request.urlopen(
@@ -124,7 +128,7 @@ if len(unique_trains) > 1:
     lines = "\n".join(f"  {name}: {ver} (train {t})" for name, (ver, t) in sources.items())
     print(
         f"HA version sync FAILED — release train mismatch:\n{lines}\n\n"
-        "Update hacs.json, requirements_test.txt, and .devcontainer/.env together. "
+        "Update hacs.json, uv.lock, and .devcontainer/.env together. "
         "If CI workflows were edited, avoid hardcoded HA_VERSION values there.",
         file=sys.stderr,
     )
