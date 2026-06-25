@@ -12,7 +12,7 @@ permissions: {}
 
 jobs:
   quality:
-    name: Lint, type-check & test
+    name: Smoke
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
@@ -25,16 +25,16 @@ jobs:
           enable-cache: true
 
       - name: Sync the locked environment
-        run: uv sync --locked
+        run: ./script/uv-sync
 
-      - name: Ruff format check
-        run: uv run ruff format --check .
+      - name: Check lock file
+        run: ./script/lock-check
 
-      - name: Ruff lint
-        run: uv run ruff check .
+      - name: Lint check
+        run: ./script/lint-check
 
-      - name: ty type check
-        run: uv run ty check
+      - name: Type check
+        run: ./script/type-check
 
-      - name: Pytest
-        run: uv run pytest
+      - name: Test
+        run: ./script/test

@@ -22,12 +22,10 @@ source "$SCRIPT_DIR/.lib/output.sh"
 # shellcheck source=script/.lib/integration.sh
 source "$SCRIPT_DIR/.lib/integration.sh"
 
-activate_venv
-
 run_hook "yaml-check" "pre"
 
 log_header "Checking YAML with yamllint"
-yamllint -c .yamllint.yml \
+uv run yamllint -c .yamllint.yml \
     "$INTEGRATION_PATH"/ \
     schemas/yaml/ \
     .github/ \

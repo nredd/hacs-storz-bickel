@@ -160,4 +160,4 @@ hours_to_show: 24
 
 - [Configuration Reference](./CONFIGURATION.md) - All configuration options
 - [Getting Started](./GETTING_STARTED.md) - Installation and initial setup
-- [GitHub Issues](https://github.com/nredd/hacs-volcano/issues) - Report problems
+- [GitHub Issues](https://github.com/nredd/hacs-storz-bickel/issues) - Report problems

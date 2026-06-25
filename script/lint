@@ -25,8 +25,6 @@ cd "$SCRIPT_DIR/.."
 # shellcheck source=script/.lib/output.sh
 source "$SCRIPT_DIR/.lib/output.sh"
 
-activate_venv
-
 run_hook "lint" "pre"
 
 "$SCRIPT_DIR/python"
