@@ -14,10 +14,18 @@ from bleak.exc import BleakError
 from bleak_retry_connector import BleakClientWithServiceCache
 import pytest
 
-from custom_components.storz_bickel.api import DeviceType, capabilities_for, const as c, detect_device_type
+from custom_components.storz_bickel.api import (
+    DeviceType,
+    capabilities_for,
+    const as c,
+    detect_device_type,
+)
 from custom_components.storz_bickel.api.devices.base import SBDevice
 from custom_components.storz_bickel.api.devices.crafty import CraftyDevice
-from custom_components.storz_bickel.api.devices.venty_veazy import VentyDevice, _build_frame
+from custom_components.storz_bickel.api.devices.venty_veazy import (
+    VentyDevice,
+    _build_frame,
+)
 from custom_components.storz_bickel.api.devices.volcano import VolcanoDevice
 from custom_components.storz_bickel.api.models import SBDeviceState
 
@@ -37,7 +45,9 @@ class FakeClient:
             raise BleakError(msg)
         return self._reads[uuid]
 
-    async def write_gatt_char(self, uuid: str, data: bytes, *, response: bool = False) -> None:
+    async def write_gatt_char(
+        self, uuid: str, data: bytes, *, response: bool = False
+    ) -> None:
         _ = response
         self.writes.append((uuid, bytes(data)))
 
@@ -45,7 +55,9 @@ class FakeClient:
         self.notifications[uuid] = handler
 
 
-def _make[DeviceT: SBDevice](device_cls: type[DeviceT], client: FakeClient | None = None) -> tuple[DeviceT, FakeClient]:
+def _make[DeviceT: SBDevice](
+    device_cls: type[DeviceT], client: FakeClient | None = None
+) -> tuple[DeviceT, FakeClient]:
     """Build a device of the given type backed by a fake BLE client."""
     ble = MagicMock()
     ble.address = "AA:BB:CC:DD:EE:FF"
@@ -74,12 +86,17 @@ def _make[DeviceT: SBDevice](device_cls: type[DeviceT], client: FakeClient | Non
         ("Some Lamp", ["1234"], None),
     ],
 )
-def test_detect_device_type(name: str | None, uuids: list[str], expected: DeviceType | None) -> None:
+def test_detect_device_type(
+    name: str | None, uuids: list[str], expected: DeviceType | None
+) -> None:
     assert detect_device_type(name, uuids) == expected
 
 
 def test_total_runtime_hours() -> None:
-    assert SBDeviceState(hours_of_operation=120, minutes_of_operation=30).total_runtime_hours == 120.5
+    assert (
+        SBDeviceState(hours_of_operation=120, minutes_of_operation=30).total_runtime_hours
+        == 120.5
+    )
     assert SBDeviceState(hours_of_operation=10).total_runtime_hours == 10.0
     assert SBDeviceState().total_runtime_hours is None
 
@@ -139,7 +156,9 @@ def test_volcano_status_decode(raw: bytes, heater: bool, pump: bool) -> None:
 
 
 async def test_volcano_poll_temperature() -> None:
-    device, _ = _make(VolcanoDevice, FakeClient(reads={c.VOLCANO_UUID_CURRENT_TEMP: b"\x46\x07"}))
+    device, _ = _make(
+        VolcanoDevice, FakeClient(reads={c.VOLCANO_UUID_CURRENT_TEMP: b"\x46\x07"})
+    )
     device._poll_count = 1  # skip the slow settings refresh
     state = await device.async_poll()
     assert state.current_temperature == 186.2
@@ -160,7 +179,9 @@ async def test_volcano_vibration_read_modify_write() -> None:
 
 
 def test_venty_build_frame() -> None:
-    frame = _build_frame(c.VENTY_CMD_STATUS, c.VENTY_WRITE_SET_TEMPERATURE, {4: 0x3A, 5: 0x07})
+    frame = _build_frame(
+        c.VENTY_CMD_STATUS, c.VENTY_WRITE_SET_TEMPERATURE, {4: 0x3A, 5: 0x07}
+    )
     assert len(frame) == 20
     assert frame[0] == c.VENTY_CMD_STATUS
     assert frame[1] == c.VENTY_WRITE_SET_TEMPERATURE

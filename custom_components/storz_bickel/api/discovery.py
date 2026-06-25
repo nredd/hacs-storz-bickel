@@ -11,7 +11,9 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
 
-def detect_device_type(name: str | None, service_uuids: Iterable[str]) -> DeviceType | None:
+def detect_device_type(
+    name: str | None, service_uuids: Iterable[str]
+) -> DeviceType | None:
     """Identify the Storz & Bickel device family from advertisement data.
 
     Detection prefers the advertised name (the only way to tell a Venty from a

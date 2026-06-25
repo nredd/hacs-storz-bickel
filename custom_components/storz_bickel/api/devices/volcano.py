@@ -13,7 +13,11 @@ from typing import TYPE_CHECKING
 
 from custom_components.storz_bickel.api import const as c
 from custom_components.storz_bickel.api.devices.base import SBDevice
-from custom_components.storz_bickel.api.models import DeviceCapabilities, DeviceType, SBDeviceState
+from custom_components.storz_bickel.api.models import (
+    DeviceCapabilities,
+    DeviceType,
+    SBDeviceState,
+)
 
 if TYPE_CHECKING:
     from bleak.backends.characteristic import BleakGATTCharacteristic
@@ -47,21 +51,31 @@ class VolcanoDevice(SBDevice):
     async def _read_static_info(self) -> None:
         """Read serial number and firmware versions once after connecting."""
         self._state.serial_number = await self._read_string(c.VOLCANO_UUID_SERIAL_NUMBER)
-        self._state.firmware_version = await self._read_string(c.VOLCANO_UUID_FIRMWARE_VERSION)
-        self._state.ble_firmware_version = await self._read_string(c.VOLCANO_UUID_BLE_FIRMWARE_VERSION)
+        self._state.firmware_version = await self._read_string(
+            c.VOLCANO_UUID_FIRMWARE_VERSION
+        )
+        self._state.ble_firmware_version = await self._read_string(
+            c.VOLCANO_UUID_BLE_FIRMWARE_VERSION
+        )
 
     async def _subscribe(self) -> None:
         """Subscribe to the heat/pump status register notifications."""
-        await self._start_notify(c.VOLCANO_UUID_STATUS_REGISTER, self._handle_status_notification)
+        await self._start_notify(
+            c.VOLCANO_UUID_STATUS_REGISTER, self._handle_status_notification
+        )
 
-    def _handle_status_notification(self, _char: BleakGATTCharacteristic, data: bytearray) -> None:
+    def _handle_status_notification(
+        self, _char: BleakGATTCharacteristic, data: bytearray
+    ) -> None:
         """Decode the uint16 status bitmask (heater/pump/auto-shutoff) and push it."""
         if len(data) < 2:
             return
         value = int.from_bytes(data[:2], byteorder="little")
         self._state.heater_on = bool(value & c.VOLCANO_STATUS_MASK_HEATER)
         self._state.pump_on = bool(value & c.VOLCANO_STATUS_MASK_PUMP)
-        self._state.auto_shutoff_enabled = bool(value & c.VOLCANO_STATUS_MASK_AUTO_SHUTOFF)
+        self._state.auto_shutoff_enabled = bool(
+            value & c.VOLCANO_STATUS_MASK_AUTO_SHUTOFF
+        )
         self._fire_callbacks()
 
     async def async_poll(self) -> SBDeviceState:
@@ -92,8 +106,12 @@ class VolcanoDevice(SBDevice):
         if auto_off_seconds is not None:
             self._state.auto_shutoff_minutes = auto_off_seconds // 60
 
-        self._state.hours_of_operation = await self._read_uint16(c.VOLCANO_UUID_HOURS_OF_OPERATION)
-        self._state.minutes_of_operation = await self._read_uint16(c.VOLCANO_UUID_MINUTES_OF_OPERATION)
+        self._state.hours_of_operation = await self._read_uint16(
+            c.VOLCANO_UUID_HOURS_OF_OPERATION
+        )
+        self._state.minutes_of_operation = await self._read_uint16(
+            c.VOLCANO_UUID_MINUTES_OF_OPERATION
+        )
 
         control = await self._read_uint32_control()
         if control is not None:
@@ -136,15 +154,23 @@ class VolcanoDevice(SBDevice):
         control = await self._read_uint32_control()
         if control is None:
             return
-        control = control | c.VOLCANO_MASK_VIBRATION if on else control & ~c.VOLCANO_MASK_VIBRATION
-        await self._write(c.VOLCANO_UUID_CONTROL_REGISTER, control.to_bytes(4, byteorder="little"))
+        control = (
+            control | c.VOLCANO_MASK_VIBRATION
+            if on
+            else control & ~c.VOLCANO_MASK_VIBRATION
+        )
+        await self._write(
+            c.VOLCANO_UUID_CONTROL_REGISTER, control.to_bytes(4, byteorder="little")
+        )
         self._state.vibration = on
         self._fire_callbacks()
 
     async def async_set_led_brightness(self, percent: int) -> None:
         """Write the LED brightness (single byte 0-100)."""
         clamped = int(self._clamp(percent, 0, 100))
-        await self._write(c.VOLCANO_UUID_LED_BRIGHTNESS, clamped.to_bytes(1, byteorder="little"))
+        await self._write(
+            c.VOLCANO_UUID_LED_BRIGHTNESS, clamped.to_bytes(1, byteorder="little")
+        )
         self._state.led_brightness = clamped
         self._fire_callbacks()
 
@@ -157,6 +183,8 @@ class VolcanoDevice(SBDevice):
     async def async_set_auto_shutoff_minutes(self, minutes: int) -> None:
         """Set the auto-shutoff duration (uint16 LE seconds)."""
         seconds = max(0, minutes) * 60
-        await self._write(c.VOLCANO_UUID_AUTO_OFF_SETTING, seconds.to_bytes(2, byteorder="little"))
+        await self._write(
+            c.VOLCANO_UUID_AUTO_OFF_SETTING, seconds.to_bytes(2, byteorder="little")
+        )
         self._state.auto_shutoff_minutes = minutes
         self._fire_callbacks()

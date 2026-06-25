@@ -29,8 +29,7 @@ uv run yamllint -c .yamllint.yml \
     "$INTEGRATION_PATH"/ \
     schemas/yaml/ \
     .github/ \
-    .pre-commit-config.yaml \
-    .prettierrc.yml
+    .pre-commit-config.yaml
 
 run_hook "yaml-check" "post"
 log_success "YAML check completed"

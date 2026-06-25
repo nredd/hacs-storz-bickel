@@ -67,7 +67,9 @@ VENTY_UUID_DEVICE_NAME: Final = "00002a00-0000-1000-8000-00805f9b34fb"
 # Control-characteristic command opcodes (byte 0 of the 20-byte frame; the same
 # opcode is echoed in byte 0 of the notification response).
 VENTY_CMD_STATUS: Final = 0x01
-VENTY_CMD_EXTENDED_DATA: Final = 0x04  # -> heater runtime + battery charging time (uint24 each)
+VENTY_CMD_EXTENDED_DATA: Final = (
+    0x04  # -> heater runtime + battery charging time (uint24 each)
+)
 VENTY_CMD_DEVICE_DATA: Final = 0x05  # -> serial number
 
 # Write masks (byte 1 of the frame) selecting which fields the write updates.

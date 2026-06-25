@@ -52,7 +52,9 @@ class FakeDevice:
     def state(self) -> SBDeviceState:
         return self._state
 
-    def register_callback(self, _callback: Callable[[SBDeviceState], None]) -> Callable[[], None]:
+    def register_callback(
+        self, _callback: Callable[[SBDeviceState], None]
+    ) -> Callable[[], None]:
         return lambda: None
 
     def set_ble_device(self, _ble_device: object) -> None:
@@ -84,7 +86,9 @@ async def _setup(hass: HomeAssistant, enable_bluetooth: None) -> MockConfigEntry
     return entry
 
 
-async def test_setup_creates_entities(hass: HomeAssistant, enable_bluetooth: None) -> None:
+async def test_setup_creates_entities(
+    hass: HomeAssistant, enable_bluetooth: None
+) -> None:
     entry = await _setup(hass, enable_bluetooth)
     assert entry.state is ConfigEntryState.LOADED
 

@@ -24,12 +24,16 @@ _SETUP_ENTRY = "custom_components.storz_bickel.async_setup_entry"
 _DISCOVERED = "custom_components.storz_bickel.config_flow_handler.config_flow.bluetooth.async_discovered_service_info"
 
 
-def _info(address: str, name: str | None, service_uuids: list[str] | None = None) -> SimpleNamespace:
+def _info(
+    address: str, name: str | None, service_uuids: list[str] | None = None
+) -> SimpleNamespace:
     """Build a lightweight discovery info object exposing the fields the flow uses."""
     return SimpleNamespace(address=address, name=name, service_uuids=service_uuids or [])
 
 
-async def test_bluetooth_discovery_creates_entry(hass: HomeAssistant, enable_bluetooth: None) -> None:
+async def test_bluetooth_discovery_creates_entry(
+    hass: HomeAssistant, enable_bluetooth: None
+) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN,
         context={"source": SOURCE_BLUETOOTH},
@@ -47,7 +51,9 @@ async def test_bluetooth_discovery_creates_entry(hass: HomeAssistant, enable_blu
     assert result["result"].unique_id == VOLCANO_ADDRESS
 
 
-async def test_bluetooth_discovery_not_supported(hass: HomeAssistant, enable_bluetooth: None) -> None:
+async def test_bluetooth_discovery_not_supported(
+    hass: HomeAssistant, enable_bluetooth: None
+) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN,
         context={"source": SOURCE_BLUETOOTH},
@@ -57,7 +63,9 @@ async def test_bluetooth_discovery_not_supported(hass: HomeAssistant, enable_blu
     assert result["reason"] == "not_supported"
 
 
-async def test_bluetooth_discovery_already_configured(hass: HomeAssistant, enable_bluetooth: None) -> None:
+async def test_bluetooth_discovery_already_configured(
+    hass: HomeAssistant, enable_bluetooth: None
+) -> None:
     entry = MockConfigEntry(domain=DOMAIN, unique_id=VOLCANO_ADDRESS)
     entry.add_to_hass(hass)
 
@@ -72,15 +80,21 @@ async def test_bluetooth_discovery_already_configured(hass: HomeAssistant, enabl
 
 async def test_user_flow_no_devices(hass: HomeAssistant, enable_bluetooth: None) -> None:
     with patch(_DISCOVERED, return_value=[]):
-        result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": SOURCE_USER}
+        )
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "no_devices_found"
 
 
-async def test_user_flow_selects_device(hass: HomeAssistant, enable_bluetooth: None) -> None:
+async def test_user_flow_selects_device(
+    hass: HomeAssistant, enable_bluetooth: None
+) -> None:
     discovered = [_info(CRAFTY_ADDRESS, None, [c.CRAFTY_SERVICE_DATA])]
     with patch(_DISCOVERED, return_value=discovered):
-        result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": SOURCE_USER}
+        )
         assert result["type"] is FlowResultType.FORM
         assert result["step_id"] == "user"
 

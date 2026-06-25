@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from homeassistant.components.climate import ClimateEntity, ClimateEntityDescription, ClimateEntityFeature, HVACMode
+from homeassistant.components.climate import (
+    ClimateEntity,
+    ClimateEntityDescription,
+    ClimateEntityFeature,
+    HVACMode,
+)
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 
 from custom_components.storz_bickel.const import PARALLEL_UPDATES as _PARALLEL_UPDATES
@@ -14,7 +19,9 @@ if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-    from custom_components.storz_bickel.coordinator import StorzBickelDataUpdateCoordinator
+    from custom_components.storz_bickel.coordinator import (
+        StorzBickelDataUpdateCoordinator,
+    )
     from custom_components.storz_bickel.data import StorzBickelConfigEntry
 
 PARALLEL_UPDATES = _PARALLEL_UPDATES

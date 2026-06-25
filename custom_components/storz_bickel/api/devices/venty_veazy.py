@@ -15,7 +15,11 @@ from typing import TYPE_CHECKING
 
 from custom_components.storz_bickel.api import const as c
 from custom_components.storz_bickel.api.devices.base import SBDevice
-from custom_components.storz_bickel.api.models import DeviceCapabilities, DeviceType, SBDeviceState
+from custom_components.storz_bickel.api.models import (
+    DeviceCapabilities,
+    DeviceType,
+    SBDeviceState,
+)
 
 if TYPE_CHECKING:
     from bleak.backends.characteristic import BleakGATTCharacteristic
@@ -26,7 +30,9 @@ _FRAME_LEN = 20
 _EXTENDED_REFRESH_EVERY = 30
 
 
-def _build_frame(cmd: int, mask: int = 0, byte_values: dict[int, int] | None = None) -> bytes:
+def _build_frame(
+    cmd: int, mask: int = 0, byte_values: dict[int, int] | None = None
+) -> bytes:
     """Build a 20-byte control frame with an optional per-byte payload map."""
     frame = bytearray(_FRAME_LEN)
     frame[0] = cmd
@@ -66,7 +72,9 @@ class VentyVeazyDevice(SBDevice):
         """Write a bare request frame for the given command."""
         await self._write(c.VENTY_UUID_CONTROL, _build_frame(cmd), response=False)
 
-    def _handle_notification(self, _char: BleakGATTCharacteristic, data: bytearray) -> None:
+    def _handle_notification(
+        self, _char: BleakGATTCharacteristic, data: bytearray
+    ) -> None:
         """Dispatch a notification frame by its echoed command byte."""
         if not data:
             return
@@ -141,7 +149,11 @@ class VentyVeazyDevice(SBDevice):
         raw = safe * c.TEMP_SCALE
         await self._write(
             c.VENTY_UUID_CONTROL,
-            _build_frame(c.VENTY_CMD_STATUS, c.VENTY_WRITE_SET_TEMPERATURE, {4: raw & 0xFF, 5: raw >> 8}),
+            _build_frame(
+                c.VENTY_CMD_STATUS,
+                c.VENTY_WRITE_SET_TEMPERATURE,
+                {4: raw & 0xFF, 5: raw >> 8},
+            ),
         )
         self._state.target_temperature = safe
         self._fire_callbacks()
@@ -151,7 +163,11 @@ class VentyVeazyDevice(SBDevice):
         mode = c.VENTY_HEATER_MODE_NORMAL if on else c.VENTY_HEATER_MODE_OFF
         await self._write(
             c.VENTY_UUID_CONTROL,
-            _build_frame(c.VENTY_CMD_STATUS, c.VENTY_WRITE_HEATER, {c.VENTY_STATUS_HEATER_MODE: mode}),
+            _build_frame(
+                c.VENTY_CMD_STATUS,
+                c.VENTY_WRITE_HEATER,
+                {c.VENTY_STATUS_HEATER_MODE: mode},
+            ),
         )
         self._state.heater_on = on
         self._fire_callbacks()
@@ -161,7 +177,11 @@ class VentyVeazyDevice(SBDevice):
         value = int(self._clamp(celsius, 0, 30))
         await self._write(
             c.VENTY_UUID_CONTROL,
-            _build_frame(c.VENTY_CMD_STATUS, c.VENTY_WRITE_SET_BOOST, {c.VENTY_STATUS_BOOST_TEMP: value}),
+            _build_frame(
+                c.VENTY_CMD_STATUS,
+                c.VENTY_WRITE_SET_BOOST,
+                {c.VENTY_STATUS_BOOST_TEMP: value},
+            ),
         )
         self._state.boost_temperature = value
         self._fire_callbacks()
@@ -174,7 +194,10 @@ class VentyVeazyDevice(SBDevice):
             _build_frame(
                 c.VENTY_CMD_STATUS,
                 c.VENTY_WRITE_AUTO_SHUTOFF,
-                {c.VENTY_STATUS_AUTO_OFF_LO: seconds & 0xFF, c.VENTY_STATUS_AUTO_OFF_LO + 1: seconds >> 8},
+                {
+                    c.VENTY_STATUS_AUTO_OFF_LO: seconds & 0xFF,
+                    c.VENTY_STATUS_AUTO_OFF_LO + 1: seconds >> 8,
+                },
             ),
         )
         self._state.auto_shutoff_minutes = minutes
