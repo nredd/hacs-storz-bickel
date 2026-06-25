@@ -28,7 +28,7 @@ PARALLEL_UPDATES = _PARALLEL_UPDATES
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,  # noqa: ARG001 - required platform signature
+    _hass: HomeAssistant,
     entry: StorzBickelConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:

@@ -63,7 +63,7 @@ SWITCHES: tuple[StorzBickelSwitchEntityDescription, ...] = (
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,  # noqa: ARG001 - required platform signature
+    _hass: HomeAssistant,
     entry: StorzBickelConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
@@ -87,10 +87,10 @@ class StorzBickelSwitch(StorzBickelEntity, SwitchEntity):
         """Return whether the control is currently on."""
         return self.entity_description.is_on_fn(self.data)
 
-    async def async_turn_on(self, **kwargs: Any) -> None:  # noqa: ARG002 - switch signature
+    async def async_turn_on(self, **_kwargs: Any) -> None:
         """Turn the control on."""
         await self.entity_description.set_fn(self.device, True)
 
-    async def async_turn_off(self, **kwargs: Any) -> None:  # noqa: ARG002 - switch signature
+    async def async_turn_off(self, **_kwargs: Any) -> None:
         """Turn the control off."""
         await self.entity_description.set_fn(self.device, False)
