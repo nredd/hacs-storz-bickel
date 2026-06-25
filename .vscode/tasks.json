@@ -152,6 +152,17 @@
       "problemMatcher": []
     },
     {
+      "label": "Check Lock File",
+      "type": "shell",
+      "command": "./script/lock-check",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Validate Manifest",
       "type": "shell",
       "command": "${command:python.interpreterPath} -c \"import json; json.load(open('custom_components/storz_bickel/manifest.json')); print('✅ manifest.json is valid')\"",

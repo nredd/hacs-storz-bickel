@@ -37,6 +37,14 @@ repos:
         files: ^(custom_components/storz_bickel/|schemas/yaml/|\.github/|\.pre-commit-config\.yaml)
         pass_filenames: true
 
+      # Verify uv.lock is consistent with pyproject.toml
+      - id: lock-check
+        name: uv lock check
+        entry: ./script/lock-check
+        language: system
+        files: ^(pyproject\.toml|uv\.lock)$
+        pass_filenames: false
+
       # Keep HA release train in sync across all three version sources:
       #   requirements_test.txt (pytest-homeassistant-custom-component pin)
       #   hacs.json (homeassistant minimum)

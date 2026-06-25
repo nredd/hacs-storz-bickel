@@ -102,6 +102,8 @@ activate_venv() {
         source "$PWD/.local/ha-venv/bin/activate"
     elif [[ -f "$HOME/.local/ha-venv/bin/activate" ]]; then
         source "$HOME/.local/ha-venv/bin/activate"
+    elif [[ -f "$PWD/.venv/bin/activate" ]]; then
+        source "$PWD/.venv/bin/activate"
     else
         log_error "Virtual environment not found. Run: script/setup/bootstrap"
         exit 1

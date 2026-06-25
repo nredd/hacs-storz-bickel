@@ -10,7 +10,7 @@ This is a Home Assistant custom integration that was generated from a blueprint 
 
 - **Domain:** `storz_bickel`
 - **Title:** Storz & Bickel
-- **Repository:** nredd/hacs-volcano
+- **Repository:** nredd/hacs-storz-bickel
 
 **Key directories:**
 

@@ -32,6 +32,8 @@ activate_venv
 
 run_hook "check" "pre"
 
+"$SCRIPT_DIR/lock-check"
+echo ""
 "$SCRIPT_DIR/type-check"
 echo ""
 "$SCRIPT_DIR/lint-check"
