@@ -68,22 +68,23 @@ uv run pytest                # tests
 so local development and CI share one environment. Open the repo in the devcontainer (VS Code /
 Codespaces) to get the same toolchain.
 
-### Live BLE test (opt-in, host-only)
+### Live BLE check (host-only)
 
-`tests/test_live_ble.py` is a real-hardware test: it scans for a nearby Storz & Bickel device,
-connects over BLE, reads its identity/state, and disconnects (it never actuates the heater or
-pump). It is **skipped by default** — the normal suite and CI stay fully hermetic.
-
-Run it from your **host** machine (not the devcontainer — a Linux container on macOS has no path
-to the host's Bluetooth radio):
+`tests/live_ble.py` is a real-hardware check: it scans for a nearby Storz & Bickel device, connects
+over BLE, reads its identity/state, and disconnects (it never actuates the heater or pump). Run it
+from your **host** machine (not the devcontainer — a Linux container on macOS has no path to the
+host's Bluetooth radio):
 
 ```bash
-script/test-live             # uv sync --only-group live + SB_LIVE_BLE=1 pytest -m live
+script/test-live
 ```
 
-It uses the slim `live` dependency group (just `bleak` + `pytest`, no Home Assistant), so the host
-install is tiny. With no device in range — or inside the container — it skips rather than fails.
-On macOS, grant your terminal/IDE the Bluetooth permission on first run.
+It is a plain script, **not** part of the pytest suite, on purpose: the
+`pytest-homeassistant-custom-component` harness patches the platform to Linux, which forces `bleak`
+onto the BlueZ backend and breaks real CoreBluetooth scanning on macOS. Running standalone keeps the
+real platform backend. `uv` auto-syncs the normal project env. With no device in range it exits 0
+(clean skip); it exits non-zero only if a device is found but the connect/read fails. On macOS, grant
+your terminal/IDE the Bluetooth permission on first run.
 
 ## Attribution
 

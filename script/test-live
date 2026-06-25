@@ -1,21 +1,20 @@
 #!/bin/bash
 
-# script/test-live: Run the live BLE test against real hardware (HOST ONLY)
+# script/test-live: Run the live BLE check against real hardware (HOST ONLY)
 #
 # Scans for a nearby Storz & Bickel device, connects over BLE, reads its identity
 # and state, then disconnects. It performs NO writes — the heater/pump are never
-# actuated. Skips (does not fail) when no adapter or no device is available.
+# actuated. Exits 0 when it connects+reads or cleanly skips (no adapter/device);
+# exits non-zero only when a device was found but the connect/read failed.
 #
 # This MUST run on the host, not inside the devcontainer: a Linux Docker container
-# on macOS has no path to the Mac's Bluetooth radio. It uses the slim `live`
-# dependency group (bleak + pytest, no Home Assistant) for a fast host install.
+# on macOS has no path to the Mac's Bluetooth radio. It runs tests/live_ble.py as a
+# plain script (NOT pytest) on purpose — the pytest-homeassistant-custom-component
+# harness patches the platform to Linux, which forces bleak onto the BlueZ backend
+# and breaks real CoreBluetooth scanning. uv auto-syncs the normal project env.
 #
 # Usage:
-#   ./script/test-live [PYTEST_OPTIONS]
-#
-# Examples:
 #   ./script/test-live
-#   ./script/test-live -v
 
 set -euo pipefail
 
@@ -37,15 +36,14 @@ fi
 
 require_command uv "https://docs.astral.sh/uv/getting-started/installation/"
 
-log_header "Syncing the slim 'live' dependency group"
-uv sync --only-group live
-
-log_header "Running live BLE test"
+log_header "Running live BLE check"
 log_info "Power on a Storz & Bickel device and keep it in range."
 log_info "On first run, grant your terminal/IDE the macOS Bluetooth permission."
 echo ""
 
-SB_LIVE_BLE=1 uv run pytest -m live "$@"
+# `uv run` auto-syncs the project env (importing the integration needs the full HA
+# stack). Run as a plain script so the real CoreBluetooth backend is used.
+uv run python tests/live_ble.py
 
 run_hook "test-live" "post"
 
