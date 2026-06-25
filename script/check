@@ -28,8 +28,6 @@ cd "$SCRIPT_DIR/.."
 # shellcheck source=script/.lib/output.sh
 source "$SCRIPT_DIR/.lib/output.sh"
 
-activate_venv
-
 run_hook "check" "pre"
 
 "$SCRIPT_DIR/lock-check"

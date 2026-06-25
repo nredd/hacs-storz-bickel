@@ -12,7 +12,7 @@ permissions: {}
 
 jobs:
   quality:
-    name: Lint, type-check & test
+    name: Smoke
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
@@ -25,7 +25,7 @@ jobs:
           enable-cache: true
 
       - name: Sync the locked environment
-        run: uv sync --locked
+        run: ./script/uv-sync
 
       - name: Check lock file
         run: ./script/lock-check

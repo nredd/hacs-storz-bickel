@@ -19,12 +19,10 @@ cd "$SCRIPT_DIR/.."
 # shellcheck source=script/.lib/output.sh
 source "$SCRIPT_DIR/.lib/output.sh"
 
-activate_venv
-
 run_hook "spell" "pre"
 
 log_header "Running codespell with auto-fix"
-codespell \
+uv run codespell \
     --write-changes \
     --ignore-words-list=aiport,astroid,checkin,currenty,hass,iif,incomfort,lookin,nam,NotIn \
     --skip="./.*,*.csv,*.json,*.ambr,uv.lock" \

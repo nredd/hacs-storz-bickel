@@ -88,28 +88,6 @@ require_command() {
     fi
 }
 
-# Activate the Home Assistant virtual environment if not already active.
-# Silently skips when VIRTUAL_ENV is already set (e.g. in CI or nested calls).
-activate_venv() {
-    if [[ -n ${VIRTUAL_ENV:-} ]]; then
-        return 0
-    fi
-    log_header "Activating virtual environment"
-    # shellcheck source=/dev/null
-    if [[ -f "$HOME/ha-venv/bin/activate" ]]; then
-        source "$HOME/ha-venv/bin/activate"
-    elif [[ -f "$PWD/.local/ha-venv/bin/activate" ]]; then
-        source "$PWD/.local/ha-venv/bin/activate"
-    elif [[ -f "$HOME/.local/ha-venv/bin/activate" ]]; then
-        source "$HOME/.local/ha-venv/bin/activate"
-    elif [[ -f "$PWD/.venv/bin/activate" ]]; then
-        source "$PWD/.venv/bin/activate"
-    else
-        log_error "Virtual environment not found. Run: script/setup/bootstrap"
-        exit 1
-    fi
-}
-
 # Run a user-defined hook script if it exists.
 # Hooks live in script/user/<name>.<phase>.sh and are sourced (not executed),
 # so they can read and set variables in the calling script's environment.

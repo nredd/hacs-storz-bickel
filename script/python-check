@@ -20,15 +20,13 @@ cd "$SCRIPT_DIR/.."
 # shellcheck source=script/.lib/output.sh
 source "$SCRIPT_DIR/.lib/output.sh"
 
-activate_venv
-
 run_hook "python-check" "pre"
 
 log_header "Checking Python format (Ruff)"
-ruff format custom_components/ tests/ --check
+uv run ruff format custom_components/ tests/ --check
 
 log_header "Checking Python linting (Ruff)"
-ruff check custom_components/ tests/
+uv run ruff check custom_components/ tests/
 
 # Clean up any accidental package installation from uv run
 "$SCRIPT_DIR/clean" --minimal
