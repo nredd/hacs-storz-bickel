@@ -190,12 +190,10 @@ For `.devcontainer/` scripts the same pattern applies under `.devcontainer/hooks
 | `script/markdown-check`           | `script/hooks/markdown-check.pre.sh`        | `script/hooks/markdown-check.post.sh`        |
 | `script/python`                   | `script/hooks/python.pre.sh`                | `script/hooks/python.post.sh`                |
 | `script/python-check`             | `script/hooks/python-check.pre.sh`          | `script/hooks/python-check.post.sh`          |
-| `script/release-notes`            | `script/hooks/release-notes.pre.sh`         | `script/hooks/release-notes.post.sh`         |
 | `script/shell`                    | `script/hooks/shell.pre.sh`                 | `script/hooks/shell.post.sh`                 |
 | `script/shell-check`              | `script/hooks/shell-check.pre.sh`           | `script/hooks/shell-check.post.sh`           |
-| `script/spell`                    | `script/hooks/spell.pre.sh`                 | `script/hooks/spell.post.sh`                 |
-| `script/spell-check`              | `script/hooks/spell-check.pre.sh`           | `script/hooks/spell-check.post.sh`           |
 | `script/test`                     | `script/hooks/test.pre.sh`                  | `script/hooks/test.post.sh`                  |
+| `script/test-live`                | `script/hooks/test-live.pre.sh`             | `script/hooks/test-live.post.sh`             |
 | `script/type-check`               | `script/hooks/type-check.pre.sh`            | `script/hooks/type-check.post.sh`            |
 | `script/version`                  | `script/hooks/version.pre.sh`               | `script/hooks/version.post.sh`               |
 | `script/yaml-check`               | `script/hooks/yaml-check.pre.sh`            | `script/hooks/yaml-check.post.sh`            |

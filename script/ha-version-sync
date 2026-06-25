@@ -25,7 +25,9 @@ cd "$SCRIPT_DIR/.."
 # shellcheck source=script/.lib/output.sh
 source "$SCRIPT_DIR/.lib/output.sh"
 
-uv run python3 <<'PY'
+# Only stdlib is used below, so skip syncing the project env (keeps this fast in CI
+# and avoids installing the full Home Assistant stack just to compare version strings).
+uv run --no-project python3 <<'PY'
 from __future__ import annotations
 
 import json

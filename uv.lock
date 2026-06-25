@@ -2414,11 +2414,18 @@ dev = [
     { name = "bleak-retry-connector" },
     { name = "colorlog" },
     { name = "isal" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
     { name = "pytest-homeassistant-custom-component" },
     { name = "ruff" },
     { name = "serialx" },
     { name = "ty" },
     { name = "zlib-ng" },
+]
+live = [
+    { name = "bleak-retry-connector" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
 ]
 
 [package.metadata]
@@ -2430,11 +2437,18 @@ dev = [
     { name = "bleak-retry-connector", specifier = ">=3.6.0" },
     { name = "colorlog", specifier = "==6.10.1" },
     { name = "isal", specifier = "==1.8.0" },
+    { name = "pytest", specifier = ">=8" },
+    { name = "pytest-asyncio", specifier = ">=0.24" },
     { name = "pytest-homeassistant-custom-component", specifier = ">=0.13.339" },
     { name = "ruff", specifier = ">=0.15.0" },
     { name = "serialx" },
     { name = "ty", specifier = ">=0.0.51" },
     { name = "zlib-ng", specifier = "==1.0.0" },
+]
+live = [
+    { name = "bleak-retry-connector", specifier = ">=3.6.0" },
+    { name = "pytest", specifier = ">=8" },
+    { name = "pytest-asyncio", specifier = ">=0.24" },
 ]
 
 [[package]]

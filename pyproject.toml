@@ -21,12 +21,24 @@ requires-python = ">=3.14.2,<3.15"
 authors = [{ name = "Nicholas Redd" }]
 
 [dependency-groups]
+# The `live` group is the minimal, Home Assistant-free environment needed to run
+# the opt-in live BLE test (tests/test_live_ble.py) against real hardware. The
+# integration's api/ layer imports only bleak + bleak-retry-connector (no HA), so
+# the host can `uv sync --only-group live` for a tiny env instead of the full dev
+# stack. pytest + pytest-asyncio are included so the async test is runnable there.
+live = [
+    "bleak-retry-connector>=3.6.0",
+    "pytest>=8",
+    "pytest-asyncio>=0.24",
+]
+
 # Everything needed to develop, type-check, and test the integration locally and
 # in CI. `pytest-homeassistant-custom-component` pulls in homeassistant + the full
-# pytest stack (pytest, pytest-asyncio, …) transitively.
+# pytest stack (pytest, pytest-asyncio, …) transitively. Re-includes `live` so the
+# BLE deps live in exactly one place.
 dev = [
+    { include-group = "live" },
     "pytest-homeassistant-custom-component>=0.13.339",
-    "bleak-retry-connector>=3.6.0",
     # Optional Home Assistant component dependencies pulled in by the bluetooth/usb
     # stack; installed so the integration imports cleanly in dev and CI.
     "aiousbwatcher>=1.1.1",
@@ -172,6 +184,7 @@ addopts = "-ra -q --strict-markers"
 markers = [
     "unit: Unit tests (fast, no external dependencies)",
     "integration: Integration tests (may use coordinator/time service)",
+    "live: Live BLE test against real hardware (opt-in via SB_LIVE_BLE=1; host-only)",
 ]
 # Home Assistant and its dependencies emit assorted warnings during component
 # setup; do not treat them as errors (which would break loading the bluetooth stack).

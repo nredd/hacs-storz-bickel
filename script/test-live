@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# script/test-live: Run the live BLE test against real hardware (HOST ONLY)
+#
+# Scans for a nearby Storz & Bickel device, connects over BLE, reads its identity
+# and state, then disconnects. It performs NO writes — the heater/pump are never
+# actuated. Skips (does not fail) when no adapter or no device is available.
+#
+# This MUST run on the host, not inside the devcontainer: a Linux Docker container
+# on macOS has no path to the Mac's Bluetooth radio. It uses the slim `live`
+# dependency group (bleak + pytest, no Home Assistant) for a fast host install.
+#
+# Usage:
+#   ./script/test-live [PYTEST_OPTIONS]
+#
+# Examples:
+#   ./script/test-live
+#   ./script/test-live -v
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR/.."
+
+# shellcheck source=script/.lib/output.sh
+source "$SCRIPT_DIR/.lib/output.sh"
+
+run_hook "test-live" "pre"
+
+# Refuse to run inside the devcontainer/Codespaces — no host Bluetooth radio there.
+if [[ -n "${REMOTE_CONTAINERS:-}" || -n "${CODESPACES:-}" ]]; then
+    log_error "script/test-live cannot run inside the devcontainer"
+    log_info "Docker on macOS has no path to the host Bluetooth radio."
+    log_info "Open the project on your host machine and run: script/test-live"
+    exit 1
+fi
+
+require_command uv "https://docs.astral.sh/uv/getting-started/installation/"
+
+log_header "Syncing the slim 'live' dependency group"
+uv sync --only-group live
+
+log_header "Running live BLE test"
+log_info "Power on a Storz & Bickel device and keep it in range."
+log_info "On first run, grant your terminal/IDE the macOS Bluetooth permission."
+echo ""
+
+SB_LIVE_BLE=1 uv run pytest -m live "$@"
+
+run_hook "test-live" "post"
+
+log_success "Live BLE test completed"
