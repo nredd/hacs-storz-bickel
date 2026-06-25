@@ -29,6 +29,9 @@ jobs:
           version: "0.9.4"
           enable-cache: true
 
+      - name: Install shell tools
+        run: sudo apt-get install -y --no-install-recommends shellcheck shfmt
+
       - name: Sync the locked environment
         run: ./script/uv-sync
 
