@@ -27,14 +27,13 @@ permissions: {}
 jobs:
   smoke:
     name: Smoke (devcontainer)
-    # The whole point of this job: run script/smoke inside the SAME image the
-    # devcontainer builds, so CI and local dev share one environment. The image is
-    # cached to GHCR (built+pushed on main, pulled via cacheFrom on PRs).
+    # Build the project's devcontainer image and run script/smoke inside it, so CI
+    # and local dev share one environment. Split into explicit build / start / run
+    # steps via the Dev Containers CLI so a failure points at the right phase.
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
     steps:
       - name: Checkout the repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -46,25 +45,17 @@ jobs:
         # tolerates an empty host gitconfig.
         run: touch "$HOME/.gitconfig"
 
-      - name: Log in to GitHub Container Registry
-        # Needed to push the cached image on main, and to authenticate cacheFrom
-        # pulls on same-repo PRs. Skipped for fork PRs, whose token can't access
-        # packages — they fall back to a cold build (cacheFrom miss is non-fatal).
-        if: github.event.pull_request.head.repo.fork != true
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install the Dev Containers CLI
+        run: npm install -g @devcontainers/cli@0.87.0
 
-      - name: Build devcontainer and run smoke
-        uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
-        with:
-          imageName: ghcr.io/${{ github.repository }}-devcontainer
-          cacheFrom: ghcr.io/${{ github.repository }}-devcontainer
-          # Push the freshly built image only on main; PRs reuse it via cacheFrom.
-          push: filter
-          runCmd: script/smoke
+      - name: Build devcontainer image
+        run: devcontainer build --workspace-folder .
+
+      - name: Start devcontainer (runs lifecycle hooks)
+        run: devcontainer up --workspace-folder .
+
+      - name: Run smoke
+        run: devcontainer exec --workspace-folder . script/smoke
 
   hassfest:
     # https://developers.home-assistant.io/blog/2020/04/16/hassfest
