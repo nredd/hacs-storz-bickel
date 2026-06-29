@@ -1,163 +1,146 @@
 # Examples
 
-This page provides ready-to-use examples for automations, dashboards, and blueprints
-with the Storz & Bickel custom integration.
+Ready-to-use automations and dashboard cards for the Storz & Bickel integration.
 
-Replace entity IDs like `sensor.device_name_*` with your actual entity IDs after
-setting up the integration.
+> **Entity IDs are placeholders.** These examples use a `volcano` / `venty` prefix. Your entity IDs
+> are derived from your device's Bluetooth name — check **Developer Tools → States** for the real
+> ones and substitute accordingly. Some entities only exist on certain models (e.g. the pump is
+> Volcano-only; battery is on the portable models) — see [CONFIGURATION.md](CONFIGURATION.md).
 
 ## Automations
 
-### Notify when a sensor exceeds a threshold
+### Notify when the chamber reaches temperature
+
+Fires when the live chamber temperature catches up to the heater setpoint.
 
 ```yaml
 automation:
-  - alias: "Alert when sensor is high"
-    trigger:
-      - trigger: numeric_state
-        entity_id: sensor.device_name_air_quality
-        above: 100
-    action:
-      - action: notify.notify
+  - alias: "Vaporizer reached temperature"
+    triggers:
+      - trigger: template
+        value_template: >
+          {{ state_attr('climate.volcano', 'current_temperature') | float(0)
+             >= state_attr('climate.volcano', 'temperature') | float(999) }}
+    conditions:
+      - condition: state
+        entity_id: climate.volcano
+        state: heat
+    actions:
+      - action: notify.mobile_app_phone
         data:
-          title: "Air quality alert"
-          message: "Sensor value exceeded 100!"
+          message: >
+            Volcano has reached {{ state_attr('climate.volcano', 'temperature') }}°C.
 ```
 
-### Turn on a switch when connectivity is lost
+### Volcano: run the pump briefly when ready
+
+Turns the pump on for 30 seconds once the setpoint is reached (Volcano only — it's the only model
+with a pump).
 
 ```yaml
 automation:
-  - alias: "React to connectivity loss"
-    trigger:
-      - trigger: state
-        entity_id: binary_sensor.device_name_connectivity
-        to: "off"
-        for:
-          minutes: 5
-    action:
+  - alias: "Volcano auto-pump when ready"
+    triggers:
+      - trigger: template
+        value_template: >
+          {{ state_attr('climate.volcano', 'current_temperature') | float(0)
+             >= state_attr('climate.volcano', 'temperature') | float(999) }}
+    conditions:
+      - condition: state
+        entity_id: climate.volcano
+        state: heat
+    actions:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.volcano_pump
+      - delay: "00:00:30"
       - action: switch.turn_off
         target:
-          entity_id: switch.device_name_switch
+          entity_id: switch.volcano_pump
 ```
 
-### Call a service action on schedule
+### Turn the heater off when everyone leaves
+
+Avoids leaving the heater running. Replace `binary_sensor.anyone_home` with your presence entity.
 
 ```yaml
 automation:
-  - alias: "Reset filter counter weekly"
-    trigger:
-      - trigger: time
-        at: "03:00:00"
-    condition:
-      - condition: time
-        weekday:
-          - mon
-    action:
-      - action: storz_bickel.example_service
+  - alias: "Turn off vaporizer when away"
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.anyone_home
+        to: "off"
+    actions:
+      - action: climate.turn_off
         target:
-          entity_id: button.device_name_reset_filter
+          entity_id: climate.volcano
 ```
 
-### Use a blueprint for threshold alerts
+### Low-battery notification (portable models)
 
-Save this as a blueprint file and import it in Home Assistant:
+For Venty / Veazy / Crafty, which report a battery level.
 
 ```yaml
-blueprint:
-  name: Storz & Bickel — Threshold Alert
-  description: Send a notification when a sensor exceeds a configurable threshold.
-  domain: automation
-  input:
-    sensor_entity:
-      name: Sensor
-      selector:
-        entity:
-          domain: sensor
-          integration: storz_bickel
-    threshold:
-      name: Threshold value
-      selector:
-        number:
-          min: 0
-          max: 1000
-    notify_target:
-      name: Notification service
-      default: notify.notify
-      selector:
-        text:
-
-trigger:
-  - trigger: numeric_state
-    entity_id: !input sensor_entity
-    above: !input threshold
-
-action:
-  - action: !input notify_target
-    data:
-      message: >-
-        {{ state_attr(trigger.entity_id, 'friendly_name') }}
-        exceeded {{ threshold }} (current value: {{ trigger.to_state.state }}).
+automation:
+  - alias: "Vaporizer low battery"
+    triggers:
+      - trigger: numeric_state
+        entity_id: sensor.venty_battery
+        below: 20
+    actions:
+      - action: notify.mobile_app_phone
+        data:
+          message: "Venty battery is low ({{ states('sensor.venty_battery') }}%)."
 ```
 
-## Dashboard Cards
+## Dashboard cards
 
-### Sensor value card
+### Thermostat card
+
+The heater is a `climate` entity, so the standard thermostat card works directly.
 
 ```yaml
-type: sensor
-entity: sensor.device_name_air_quality
-name: Air Quality
-graph: line
+type: thermostat
+entity: climate.volcano
 ```
 
-### Device summary — entities card
+### Device overview (entities card)
+
+Group the controls you use most. Drop any rows that don't exist on your model.
 
 ```yaml
 type: entities
-title: My Device
+title: Volcano
 entities:
-  - entity: sensor.device_name_air_quality
-    name: Air Quality
-  - entity: binary_sensor.device_name_connectivity
-    name: Connected
-  - entity: binary_sensor.device_name_filter
-    name: Filter Status
-  - entity: switch.device_name_switch
-    name: Power
-  - entity: select.device_name_fan_speed
-    name: Fan Speed
-  - entity: number.device_name_threshold
-    name: Threshold
+  - entity: climate.volcano
+  - entity: switch.volcano_heater
+  - entity: switch.volcano_pump
+  - entity: number.volcano_auto_shutoff_timer
+  - entity: sensor.volcano_temperature
+  - entity: binary_sensor.volcano_heating
 ```
 
-### Status badge — multiple entities
+### Battery gauge (portable models)
 
 ```yaml
-type: glance
-title: Device Status
-entities:
-  - entity: binary_sensor.device_name_connectivity
-    name: Online
-  - entity: sensor.device_name_air_quality
-    name: Air Quality
-  - entity: binary_sensor.device_name_filter
-    name: Filter
-show_state: true
+type: gauge
+entity: sensor.venty_battery
+name: Battery
+unit: "%"
+min: 0
+max: 100
+severity:
+  green: 50
+  yellow: 20
+  red: 0
 ```
 
-### History graph
+### Temperature history
 
 ```yaml
 type: history-graph
-title: Air Quality (last 24 h)
+title: Chamber temperature
+hours_to_show: 6
 entities:
-  - entity: sensor.device_name_air_quality
-hours_to_show: 24
+  - entity: sensor.volcano_temperature
 ```
-
-## Related Documentation
-
-- [Configuration Reference](./CONFIGURATION.md) - All configuration options
-- [Getting Started](./GETTING_STARTED.md) - Installation and initial setup
-- [GitHub Issues](https://github.com/nredd/hacs-storz-bickel/issues) - Report problems

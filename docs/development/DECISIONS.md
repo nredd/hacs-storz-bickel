@@ -47,7 +47,8 @@ Each decision is documented with:
 
 **Context:** The coordinator needs to fetch data, but business logic should be separated from data transport.
 
-**Decision:** Implement API communication in separate `api/client.py` module, coordinator only orchestrates updates.
+**Decision:** Implement BLE communication in a dedicated `api/` layer (per-device adapters under
+`api/devices/`), with the coordinator only orchestrating updates.
 
 **Rationale:**
 
@@ -110,6 +111,80 @@ Each decision is documented with:
 
 ---
 
+### Capability-Gated Entities Instead of Per-Device Subclasses
+
+**Date:** 2026-06 (Storz & Bickel integration)
+
+**Context:** The Volcano, Venty, Veazy, and Crafty expose overlapping but different controls and
+telemetry. Hard-coding device-type checks in every platform would scatter that knowledge and make
+new models painful to add.
+
+**Decision:** Each device adapter declares a `DeviceCapabilities` flag set (`api/models.py`).
+Platforms iterate their `EntityDescription`s and create only the entities whose `capability` flag is
+set for the connected device (e.g. `sensor/__init__.py` filters on `getattr(capabilities, ...)`).
+
+**Rationale:**
+
+- One source of truth for what a model supports
+- Adding a model is mostly declaring its capabilities
+- Platforms stay free of device-type `if`-ladders
+
+**Consequences:**
+
+- Entity descriptions carry a `capability` field
+- Capabilities must be kept accurate per device, since they drive the entity list
+- Some entities (e.g. serial number) are always created but may stay empty if a model doesn't report
+  the value over BLE
+
+---
+
+### Push via BLE Notifications with Automatic Reconnect
+
+**Date:** 2026-06 (Storz & Bickel integration)
+
+**Context:** The device communicates over Bluetooth Low Energy and pushes state changes (heating,
+pump) as GATT notifications. Connections can drop when the device moves out of range or the official
+app grabs the single allowed connection.
+
+**Decision:** Run as `iot_class: local_push` — subscribe to BLE notifications for live state and poll
+only the current temperature on a short interval. Use `bleak-retry-connector` for resilient
+connect/reconnect, and tie entity availability to the live connection.
+
+**Rationale:**
+
+- Real-time heating/pump state without aggressive polling
+- Robust against the frequent, expected BLE disconnects
+- Honest availability: entities go unavailable when the link is down
+
+**Consequences:**
+
+- Entities are unavailable without a live connection (single-connection constraint applies)
+- Reconnect/backoff logic must be maintained in the API layer
+
+---
+
+### Device-Type Detection at the Config Flow
+
+**Date:** 2026-06 (Storz & Bickel integration)
+
+**Context:** Setup is Bluetooth-only; the correct adapter and capabilities must be chosen from the
+advertisement, with no user input.
+
+**Decision:** Detect the model from the BLE local name / service UUID during discovery and the
+config flow, keying the config entry on the device's Bluetooth address.
+
+**Rationale:**
+
+- Zero-configuration setup (no host/port/credentials)
+- Address-based unique ID is stable and avoids duplicates
+
+**Consequences:**
+
+- New models need matchers in `manifest.json` and a detection branch
+- If a device's address changes, it must be removed and re-added
+
+---
+
 ## Future Considerations
 
 ### State Restoration
@@ -124,11 +199,13 @@ Consider implementing state restoration for switches and configurable settings t
 
 Current architecture assumes single device per config entry. If multi-device support is needed, coordinator data structure will need redesign to map device ID → data.
 
-### Polling vs. Push
+### Multi-Model Validation
 
-**Status:** Uses polling
+**Status:** Volcano validated; Venty / Veazy / Crafty pending
 
-Currently implements polling-based updates. If the API supports webhooks or WebSocket, consider implementing push-based updates for real-time responsiveness.
+Venty, Veazy, and Crafty support is reverse-engineered and pending broader hardware validation.
+GATT UUIDs and capability flags for those models may need correction as real-hardware reports come
+in.
 
 ---
 

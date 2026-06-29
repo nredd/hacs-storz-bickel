@@ -12,13 +12,21 @@ Supported devices:
 
 ## Features
 
-- **Heater** as a `climate` entity (heat/off + target temperature, live current temperature on the Volcano/Crafty)
-- **Pump** control (Volcano)
-- **Settings**: display brightness, auto-shutoff timer, boost temperature, vibration (device dependent)
-- **Telemetry & metadata**: total runtime hours, lifetime heater runtime, battery level and
-  charge time, hours/minutes of operation, serial number, firmware and Bluetooth firmware versions
+- **Heater** as a `climate` entity (heat/off + target temperature, live current temperature)
+- **Pump** control (Volcano only)
+- **Settings** (which appear depends on the model):
+  - Display brightness (Volcano, Crafty)
+  - Auto-shutoff timer (all), plus an on/off toggle (Volcano)
+  - Boost temperature (Venty, Veazy, Crafty)
+  - Vibration (Volcano, Venty, Veazy)
+- **Telemetry & metadata** (device dependent): chamber temperature, battery level and charge time,
+  total/heater runtime, hours/minutes of operation, serial number, firmware and Bluetooth firmware
+  versions
 - **Live state** via Bluetooth notifications (heating / pump), with automatic reconnect
 - Local push — works great on a Raspberry Pi 5's built-in Bluetooth or via an ESPHome Bluetooth proxy
+
+See [`docs/user/`](docs/user/GETTING_STARTED.md) for setup, the full per-model entity table, and
+automation/dashboard examples.
 
 ## Requirements
 
@@ -87,6 +95,11 @@ real platform backend. `uv` auto-syncs the normal project env. With no device in
 your terminal/IDE the Bluetooth permission on first run.
 
 ## Attribution
+
+This integration was generated from the
+[`jpawlowski/hacs.integration_blueprint`](https://github.com/jpawlowski/hacs.integration_blueprint)
+template — a modernized Home Assistant integration blueprint, itself based on
+[`ludeeus/integration_blueprint`](https://github.com/ludeeus/integration_blueprint).
 
 The Volcano Hybrid BLE implementation is adapted from the MIT-licensed
 [`Chuffnugget/volcano_integration`](https://github.com/Chuffnugget/volcano_integration), and the
