@@ -51,6 +51,7 @@ class SBDevice(ABC):
         self._ble_device = ble_device
         self._client: BleakClientWithServiceCache | None = None
         self._connect_lock = asyncio.Lock()
+        self._write_lock = asyncio.Lock()
         self._state = SBDeviceState()
         self._callbacks: list[Callable[[SBDeviceState], None]] = []
         self._notify_uuids: list[str] = []
@@ -206,7 +207,8 @@ class SBDevice(ABC):
         self, uuid: str, payload: bytes = b"", *, response: bool = False
     ) -> None:
         """Write bytes to a GATT characteristic."""
-        await self._require_client().write_gatt_char(uuid, payload, response=response)
+        async with self._write_lock:
+            await self._require_client().write_gatt_char(uuid, payload, response=response)
 
     async def _start_notify(
         self, uuid: str, handler: Callable[[BleakGATTCharacteristic, bytearray], None]

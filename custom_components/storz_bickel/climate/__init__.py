@@ -42,7 +42,11 @@ class StorzBickelClimate(StorzBickelEntity, ClimateEntity):
     _attr_name = None
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
-    _attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE
+    _attr_supported_features = (
+        ClimateEntityFeature.TARGET_TEMPERATURE
+        | ClimateEntityFeature.TURN_ON
+        | ClimateEntityFeature.TURN_OFF
+    )
     _enable_turn_on_off_backwards_compatibility = False
 
     def __init__(self, coordinator: StorzBickelDataUpdateCoordinator) -> None:
@@ -75,6 +79,14 @@ class StorzBickelClimate(StorzBickelEntity, ClimateEntity):
         temperature = kwargs.get(ATTR_TEMPERATURE)
         if temperature is not None:
             await self.device.async_set_target_temperature(float(temperature))
+
+    async def async_turn_on(self) -> None:
+        """Turn the heater on."""
+        await self.device.async_set_heater(on=True)
+
+    async def async_turn_off(self) -> None:
+        """Turn the heater off."""
+        await self.device.async_set_heater(on=False)
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Turn the heater on or off."""

@@ -33,6 +33,7 @@ class DeviceCapabilities:
     platforms consult these flags instead of hard-coding device-type checks.
     """
 
+    heater: bool = True
     pump: bool = False
     vibration: bool = False
     auto_shutoff: bool = False

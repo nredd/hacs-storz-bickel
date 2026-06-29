@@ -98,8 +98,8 @@ async def test_setup_creates_entities(
     assert climate_states[0].attributes["temperature"] == 180.0
     assert climate_states[0].attributes["current_temperature"] == 40.0
 
-    # The Volcano exposes pump, vibration, and auto-shutoff switches.
-    assert len(hass.states.async_all("switch")) == 3
+    # The Volcano exposes heater, pump, vibration, and auto-shutoff switches.
+    assert len(hass.states.async_all("switch")) == 4
     # Heater + pump + connectivity binary sensors.
     assert len(hass.states.async_all("binary_sensor")) == 3
 

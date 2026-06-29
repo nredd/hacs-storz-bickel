@@ -34,6 +34,14 @@ class StorzBickelSwitchEntityDescription(SwitchEntityDescription):
 
 SWITCHES: tuple[StorzBickelSwitchEntityDescription, ...] = (
     StorzBickelSwitchEntityDescription(
+        key="heater",
+        translation_key="heater",
+        capability="heater",
+        icon="mdi:fire",
+        is_on_fn=lambda state: state.heater_on,
+        set_fn=lambda device, on: device.async_set_heater(on=on),
+    ),
+    StorzBickelSwitchEntityDescription(
         key="pump",
         translation_key="pump",
         capability="pump",
