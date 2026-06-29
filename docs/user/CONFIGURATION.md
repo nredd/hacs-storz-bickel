@@ -1,249 +1,88 @@
 # Configuration Reference
 
-This document describes all configuration options and settings available in the Storz & Bickel custom integration.
-
-## Integration Configuration
-
-### Initial Setup Options
-
-These options are configured during initial setup via the Home Assistant UI.
-
-#### Connection Settings
-
-| Option      | Type    | Required | Default | Description                                  |
-| ----------- | ------- | -------- | ------- | -------------------------------------------- |
-| **Host**    | string  | Yes      | -       | Hostname or IP address of the device/service |
-| **Port**    | integer | No       | 8080    | Connection port                              |
-| **API Key** | string  | Yes\*    | -       | Authentication key or token                  |
-| **Use SSL** | boolean | No       | false   | Enable HTTPS connection                      |
-
-\*Required if the device/service requires authentication.
-
-#### Update Settings
-
-| Option              | Type              | Required | Default  | Description                                         |
-| ------------------- | ----------------- | -------- | -------- | --------------------------------------------------- |
-| **Update Interval** | integer (seconds) | No       | 300      | How often to poll for updates (minimum: 30 seconds) |
-| **Name**            | string            | No       | "Device" | Friendly name for the integration instance          |
-
-### Options Flow (Reconfiguration)
-
-After initial setup, you can modify settings:
-
-1. Go to **Settings** → **Devices & Services**
-2. Find "Storz & Bickel"
-3. Click **Configure**
-4. Modify settings
-5. Click **Submit**
-
-**Available options:**
-
-- Update interval
-- Name/identifier
-- Connection timeout
-- Additional features (device-specific)
-
-## Entity Configuration
-
-### Entity Customization
-
-Customize entities via the UI or `configuration.yaml`:
-
-#### Via Home Assistant UI
-
-1. Go to **Settings** → **Devices & Services** → **Entities**
-2. Find and click the entity
-3. Click the settings icon
-4. Modify:
-   - Entity ID
-   - Name
-   - Icon
-   - Device class (for applicable entities)
-   - Area assignment
-
-#### Via configuration.yaml
-
-```yaml
-homeassistant:
-  customize:
-    sensor.device_name_sensor:
-      friendly_name: "Custom Sensor Name"
-      icon: mdi:custom-icon
-      unit_of_measurement: "units"
-```
-
-### Disabling Entities
-
-If you don't need certain entities:
-
-1. Go to **Settings** → **Devices & Services** → **Entities**
-2. Find the entity
-3. Click it, then click **Settings** icon
-4. Toggle **Enable entity** off
-
-Disabled entities won't update or consume resources.
-
-## Services
-
-The integration provides the following services:
-
-### `storz_bickel.example_service`
-
-Execute an example service action on the device.
-
-**Service data:**
-
-| Parameter   | Type           | Required | Description                                      |
-| ----------- | -------------- | -------- | ------------------------------------------------ |
-| `entity_id` | string or list | No       | Target entity/entities (if omitted, targets all) |
-| `parameter` | string         | Yes      | Service-specific parameter                       |
-| `value`     | integer        | No       | Numeric value for the action                     |
-
-**Example:**
-
-```yaml
-service: storz_bickel.example_service
-target:
-  entity_id: switch.device_name_switch
-data:
-  parameter: "setting_name"
-  value: 42
-```
-
-### Using Services in Automations
-
-```yaml
-automation:
-  - alias: "Call service at sunset"
-    trigger:
-      - trigger: sun
-        event: sunset
-    action:
-      - action: storz_bickel.example_service
-        target:
-          entity_id: switch.device_name_switch
-        data:
-          parameter: "mode"
-          value: 1
-```
-
-## Advanced Configuration
-
-### Multiple Instances
-
-You can add multiple instances of this integration for different devices:
-
-1. Go to **Settings** → **Devices & Services**
-2. Click **+ Add Integration**
-3. Search for "Storz & Bickel"
-4. Configure with different connection details
-
-Each instance creates separate entities with unique entity IDs.
-
-### Network Configuration
-
-If the device is on a different network or behind a firewall:
-
-- Ensure ports are open (default: 8080)
-- Configure port forwarding if needed
-- Consider VPN for remote access
-- Some devices may require static IP addresses
-
-### Polling Behavior
-
-The integration uses polling to fetch updates:
-
-- **Minimum interval:** 30 seconds (prevents overloading the device)
-- **Recommended interval:** 5 minutes (default)
-- **Longer intervals:** Save resources but reduce responsiveness
-
-Adjust based on your needs:
-
-- Real-time monitoring: 30-60 seconds
-- Regular updates: 5 minutes
-- Slow-changing values: 15-30 minutes
-
-## Diagnostic Data
-
-The integration provides diagnostic data for troubleshooting:
-
-1. Go to **Settings** → **Devices & Services**
-2. Find "Storz & Bickel"
-3. Click on the device
-4. Click **Download Diagnostics**
-
-Diagnostic data includes:
-
-- Connection status
-- Last update timestamp
-- API response data
-- Entity states
-- Error history
-
-**Privacy note:** Diagnostic data may contain sensitive information. Review before sharing.
-
-## Blueprints
-
-The integration works with Home Assistant Blueprints for reusable automations:
-
-### Example Blueprint
-
-```yaml
-blueprint:
-  name: Storz & Bickel Alert
-  description: Send notification when sensor exceeds threshold
-  domain: automation
-  input:
-    sensor_entity:
-      name: Sensor
-      selector:
-        entity:
-          domain: sensor
-          integration: storz_bickel
-    threshold:
-      name: Threshold
-      selector:
-        number:
-          min: 0
-          max: 100
-
-trigger:
-  - trigger: numeric_state
-    entity_id: !input sensor_entity
-    above: !input threshold
-
-action:
-  - action: notify.notify
-    data:
-      message: "Sensor exceeded threshold!"
-```
-
-## Configuration Examples
-
-See [EXAMPLES.md](./EXAMPLES.md) for complete automation and dashboard examples.
-
-## Troubleshooting Configuration
-
-### Config Entry Fails to Load
-
-If the integration fails to load after configuration:
-
-1. Check Home Assistant logs for errors
-2. Verify connection details are correct
-3. Test connectivity from Home Assistant to the device
-4. Try removing and re-adding the integration
-
-### Options Don't Save
-
-If configuration changes aren't persisted:
-
-1. Check for validation errors in the UI
-2. Ensure values are within allowed ranges
-3. Review logs for detailed error messages
-4. Try restarting Home Assistant
-
-## Related Documentation
-
-- [Getting Started](./GETTING_STARTED.md) - Installation and initial setup
-- [Examples](./EXAMPLES.md) - Automation and dashboard examples
-- [GitHub Issues](https://github.com/nredd/hacs-storz-bickel/issues) - Report problems
+The Storz & Bickel integration is configured **entirely through the UI over Bluetooth**. There is
+**no YAML configuration, no options to set, and no credentials** — once a device is added (see
+[GETTING_STARTED.md](GETTING_STARTED.md)), the right entities are created automatically based on the
+model. This page documents what those entities are and how to tailor them.
+
+## How configuration works
+
+- **Setup is Bluetooth-only.** The device is auto-discovered or picked from a list of nearby
+  devices; there is nothing to type in. The device's BLE address is its unique ID.
+- **No reconfigure / options flow.** There are no host, port, API key, scan-interval, or SSL
+  settings to change. If a device's address changes, remove and re-add it.
+- **Live state is push-based.** Heating and pump state arrive via Bluetooth notifications. The
+  current chamber temperature is polled roughly every 3 seconds while connected.
+- **Availability follows the connection.** Entities are available only while Home Assistant holds a
+  live BLE connection. Remember that **only one connection is allowed at a time** — the official app
+  must be disconnected.
+
+## Entities by model
+
+Which entities are created depends on what your model exposes. ✓ = created, — = not applicable to
+that model.
+
+| Entity (suffix) | Volcano | Venty | Veazy | Crafty |
+| --- | :---: | :---: | :---: | :---: |
+| `climate` — Heater (heat/off + target temp) | ✓ | ✓ | ✓ | ✓ |
+| `switch` — Heater | ✓ | ✓ | ✓ | ✓ |
+| `switch` — Pump | ✓ | — | — | — |
+| `switch` — Vibration | ✓ | ✓ | ✓ | — |
+| `switch` — Auto shutoff (on/off toggle) | ✓ | — | — | — |
+| `number` — Display brightness (0–100 %) | ✓ | — | — | ✓ |
+| `number` — Auto shutoff timer (0–720 min) | ✓ | ✓ | ✓ | ✓ |
+| `number` — Boost temperature (0–30 °C) | — | ✓ | ✓ | ✓ |
+| `binary_sensor` — Heating | ✓ | ✓ | ✓ | ✓ |
+| `binary_sensor` — Pump | ✓ | — | — | — |
+| `binary_sensor` — Connection (diagnostic) | ✓ | ✓ | ✓ | ✓ |
+| `sensor` — Temperature | ✓ | ✓ | ✓ | ✓ |
+| `sensor` — Battery | — | ✓ | ✓ | ✓ |
+| `sensor` — Total runtime | ✓ | — | — | ✓ |
+| `sensor` — Hours of operation † | ✓ | — | — | ✓ |
+| `sensor` — Minutes of operation † | ✓ | — | — | ✓ |
+| `sensor` — Heater runtime | — | ✓ | ✓ | — |
+| `sensor` — Battery charge time † | — | ✓ | ✓ | — |
+| `sensor` — Serial number † | ✓ | ✓ | ✓ | ‡ |
+| `sensor` — Firmware version † | ✓ | ✓ | ✓ | ✓ |
+| `sensor` — Bluetooth firmware version † | ✓ | ✓ | ✓ | ✓ |
+
+† **Diagnostic, disabled by default.** Enable from the device page if you want it (see below).
+‡ The serial-number sensor exists on the Crafty but stays empty — the Crafty does not expose a
+serial over BLE.
+
+### Heater temperature range
+
+| Model | Min | Max | Step |
+| --- | --- | --- | --- |
+| Volcano Hybrid | 40 °C | 230 °C | 1 °C |
+| Venty / Veazy / Crafty | 40 °C | 210 °C | 1 °C |
+
+## Customizing entities
+
+### Enable diagnostic sensors
+
+Serial number, firmware versions, and the hours/minutes/charge-time counters are created as
+**diagnostic** entities and are **disabled by default** to keep your entity list tidy. To turn one
+on:
+
+1. Open **Settings → Devices & Services → Storz & Bickel** and click your device.
+2. Find the entity (disabled entities are listed under the device), open it, and toggle
+   **Enabled**.
+
+### Rename, hide, or assign areas
+
+Use the entity settings dialog (gear icon on any entity) to override the friendly name, hide it from
+the dashboard, or assign it to an area. These are standard Home Assistant entity customizations and
+do not affect the integration.
+
+## Notes & limitations
+
+- **No services.** This integration does not register custom services; control everything through
+  the standard `climate`, `switch`, and `number` entities (and the actions Home Assistant provides
+  for them, e.g. `climate.set_temperature`).
+- **One device per physical unit.** Each vaporizer is a single config entry keyed on its Bluetooth
+  address; there is nothing to configure for "multiple instances" beyond adding each device.
+- **Reverse-engineered models.** Venty, Veazy, and Crafty support is community-contributed and
+  pending broader hardware validation; some values may be missing or imprecise on those models.
+
+See [EXAMPLES.md](EXAMPLES.md) for automations and dashboard cards built on these entities.

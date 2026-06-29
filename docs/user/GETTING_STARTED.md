@@ -1,191 +1,111 @@
-# Getting Started with Storz & Bickel
+# Getting Started
 
-This guide will help you install and set up the Storz & Bickel custom integration for Home Assistant.
+This guide walks you through installing the **Storz & Bickel** integration and adding your
+vaporizer to Home Assistant. The integration talks to the device directly over **Bluetooth Low
+Energy (BLE)** — there is no cloud account, no companion app, and nothing to configure with a
+host, port, or API key.
 
-## Prerequisites
+## Requirements
 
-- Home Assistant 2025.7.0 or newer
-- HACS (Home Assistant Community Store) installed
-- Network connectivity to [external service/device]
+- **Home Assistant 2026.6.0 or newer.**
+- **A working Bluetooth adapter within range of the device.** This can be:
+  - Home Assistant's built-in Bluetooth (e.g. a Raspberry Pi 5), or
+  - An [ESPHome Bluetooth proxy](https://esphome.io/components/bluetooth_proxy.html) placed near the
+    device.
+- The device **powered on and in range**.
+- [HACS](https://hacs.xyz/) installed (recommended), or the ability to copy files manually.
+
+> **One connection at a time.** Storz & Bickel devices accept a single Bluetooth connection. While
+> Home Assistant is connected, the official Storz & Bickel phone/web app cannot connect to the
+> device, and vice versa. Disconnect the app before adding the device to Home Assistant.
+
+## Supported devices
+
+| Device | Status |
+| --- | --- |
+| **Volcano Hybrid** | Fully validated against hardware |
+| **Venty** | Community / reverse-engineered, pending broader validation |
+| **Veazy** | Community / reverse-engineered, pending broader validation |
+| **Crafty / Crafty+** | Community / reverse-engineered, pending broader validation |
 
 ## Installation
 
-### Via HACS (Recommended)
+### HACS (recommended)
 
-1. Open HACS in your Home Assistant instance
-2. Go to "Integrations"
-3. Click the three dots in the top right corner
-4. Select "Custom repositories"
-5. Add this repository URL: `https://github.com/nredd/hacs-storz-bickel`
-6. Set category to "Integration"
-7. Click "Add"
-8. Find "Storz & Bickel" in the integration list
-9. Click "Download"
-10. Restart Home Assistant
+1. In Home Assistant, open **HACS**.
+2. Open the three-dot menu → **Custom repositories**.
+3. Add `https://github.com/nredd/hacs-storz-bickel` with category **Integration**.
+4. Search for **Storz & Bickel** and install it.
+5. **Restart Home Assistant.**
 
-### Manual Installation
+### Manual
 
-1. Download the latest release from the [releases page](https://github.com/nredd/hacs-storz-bickel/releases)
-2. Extract the `storz_bickel` folder from the archive
-3. Copy it to `custom_components/storz_bickel/` in your Home Assistant configuration directory
-4. Restart Home Assistant
+1. Copy the `custom_components/storz_bickel` directory from this repository into your Home Assistant
+   `config/custom_components/` directory.
+2. **Restart Home Assistant.**
 
-## Initial Setup
+## Adding your device
 
-After installation, add the integration:
+Because the integration uses Bluetooth, your device is discovered automatically — you do **not**
+enter any connection details.
 
-1. Go to **Settings** → **Devices & Services**
-2. Click **+ Add Integration**
-3. Search for "Storz & Bickel"
-4. Follow the configuration steps:
+### Automatic discovery (easiest)
 
-### Step 1: Connection Information
+1. Power on the device and make sure it is in range and **not** connected to the Storz & Bickel app.
+2. Home Assistant shows a **Discovered** notification under
+   **Settings → Devices & Services**.
+3. Click **Configure**, confirm the prompt, and the device is added.
 
-Enter the required connection details:
+### Manual add
 
-- **Host/IP Address:** The hostname or IP address of your device/service
-- **API Key/Token:** Your authentication credentials (if applicable)
-- **Port:** Connection port (default: 8080)
+If the device isn't auto-discovered:
 
-Click **Submit** to test the connection.
+1. Go to **Settings → Devices & Services → Add Integration**.
+2. Search for **Storz & Bickel**.
+3. Pick your device from the list of nearby Bluetooth devices.
 
-### Step 2: Configuration Options
+There are no further questions — no host, port, username, API key, or update interval. The device's
+Bluetooth address is used as its unique identifier.
 
-Configure optional settings:
+## What you get
 
-- **Update Interval:** How often to poll for updates (default: 5 minutes)
-- **Name:** Friendly name for this integration instance
+After setup, a single device is created with entities scoped to your model's capabilities. The
+headline entity is the heater, exposed as a `climate` entity:
 
-Click **Submit** to complete setup.
+- **Heater** (`climate`) — heat/off and target temperature, with the live chamber temperature.
+- **Switches** — heater, and (model dependent) pump, vibration, and an auto-shutoff toggle.
+- **Numbers** — (model dependent) display brightness, auto-shutoff timer, boost temperature.
+- **Sensors** — chamber temperature plus (model dependent) battery, runtime counters, serial number,
+  and firmware versions. Several metadata sensors are **diagnostic and disabled by default** — enable
+  them from the device page if you want them.
+- **Binary sensors** — heating, pump (Volcano), and a connectivity sensor.
 
-## What Gets Created
+For the exact per-model entity table and how to enable diagnostic entities, see
+[CONFIGURATION.md](CONFIGURATION.md). For automations and dashboard cards, see
+[EXAMPLES.md](EXAMPLES.md).
 
-After successful setup, the integration creates:
-
-### Devices
-
-- **Device Name:** Main device representing your connected service/hardware
-  - Model information
-  - Software version
-  - Configuration URL (link to device web interface)
-
-### Entities
-
-The following entities are automatically created:
-
-#### Sensors
-
-- `sensor.<device_name>_<sensor_name>` - Descriptive sensor measurements
-- More sensors as applicable to your setup
-
-#### Binary Sensors
-
-- `binary_sensor.<device_name>_<sensor_name>` - On/off status indicators
-
-#### Switches
-
-- `switch.<device_name>_<switch_name>` - Controllable on/off switches
-
-#### Other Platforms
-
-Additional entities may be created depending on your device capabilities.
-
-## First Steps
-
-### Dashboard Cards
-
-Add entities to your dashboard:
-
-1. Go to your dashboard
-2. Click **Edit Dashboard** → **Add Card**
-3. Choose card type (e.g., "Entities", "Glance")
-4. Select entities from "Storz & Bickel"
-
-Example entities card:
-
-```yaml
-type: entities
-title: Storz & Bickel
-entities:
-  - sensor.device_name_sensor
-  - binary_sensor.device_name_connectivity
-  - switch.device_name_switch
-```
-
-### Automations
-
-Use the integration in automations:
-
-**Example - Trigger on sensor change:**
-
-```yaml
-automation:
-  - alias: "React to sensor value"
-    trigger:
-      - trigger: state
-        entity_id: sensor.device_name_sensor
-    action:
-      - action: notify.notify
-        data:
-          message: "Sensor changed to {{ trigger.to_state.state }}"
-```
-
-**Example - Control switch based on time:**
-
-```yaml
-automation:
-  - alias: "Turn on in morning"
-    trigger:
-      - trigger: time
-        at: "07:00:00"
-    action:
-      - action: switch.turn_on
-        target:
-          entity_id: switch.device_name_switch
-```
+> Entity IDs are derived from your device's Bluetooth name, e.g. `climate.volcano`,
+> `sensor.volcano_temperature`. Check **Developer Tools → States** to see the exact IDs on your
+> system; the examples in these docs use a `volcano` prefix as a placeholder.
 
 ## Troubleshooting
 
-### Connection Failed
+- **Device isn't discovered.** Confirm it's powered on, in range, and not connected to the Storz &
+  Bickel app. Verify Home Assistant has a working Bluetooth adapter under
+  **Settings → Devices & Services → Bluetooth**, or that an ESPHome Bluetooth proxy is online and
+  near the device.
+- **Entities show as unavailable.** The integration requires a live BLE connection. Range, a busy
+  Bluetooth adapter, or the official app holding the connection can all cause drops; the integration
+  reconnects automatically once the device is reachable again.
+- **Enable debug logging.** Add the following to `configuration.yaml` and restart:
 
-If setup fails with connection errors:
+  ```yaml
+  logger:
+    default: info
+    logs:
+      custom_components.storz_bickel: debug
+  ```
 
-1. Verify the host/IP address is correct and reachable
-2. Check that the API key/token is valid
-3. Ensure no firewall is blocking the connection
-4. Check Home Assistant logs for detailed error messages
-
-### Entities Not Updating
-
-If entities show "Unavailable" or don't update:
-
-1. Check that the device/service is online
-2. Verify API credentials haven't expired
-3. Review logs: **Settings** → **System** → **Logs**
-4. Try reloading the integration
-
-### Debug Logging
-
-Enable debug logging to troubleshoot issues:
-
-```yaml
-logger:
-  default: warning
-  logs:
-    custom_components.storz_bickel: debug
-```
-
-Add this to `configuration.yaml`, restart, and reproduce the issue. Check logs for detailed information.
-
-## Next Steps
-
-- See [CONFIGURATION.md](./CONFIGURATION.md) for detailed configuration options
-- See [EXAMPLES.md](./EXAMPLES.md) for more automation examples
-- Report issues at [GitHub Issues](https://github.com/nredd/hacs-storz-bickel/issues)
-
-## Support
-
-For help and discussion:
-
-- [GitHub Discussions](https://github.com/nredd/hacs-storz-bickel/discussions)
-- [Home Assistant Community Forum](https://community.home-assistant.io/)
+- **Still stuck?** Open an issue at
+  <https://github.com/nredd/hacs-storz-bickel/issues> with your model, Home Assistant version, and
+  debug logs.
