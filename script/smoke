@@ -3,11 +3,13 @@
 # script/smoke: Run the full CI Smoke suite locally
 #
 # Mirrors the "Smoke" job in .github/workflows/ci.yml exactly:
-#   uv-sync     Sync the locked environment
-#   lock-check  Verify the lock file is up to date
-#   lint-check  Python (Ruff), YAML, Shell, Markdown linting
-#   type-check  Python type checking (ty)
-#   test        Run the test suite (pytest)
+#   uv-sync        Sync the locked environment
+#   lock-check     Verify the lock file is up to date
+#   lint-check     Python (Ruff), YAML, Shell, Markdown linting
+#   spell-check    Check spelling with codespell
+#   ha-version-sync  HA release-train consistency
+#   type-check     Python type checking (ty)
+#   test           Run the test suite (pytest)
 #
 # Usage:
 #   ./script/smoke
@@ -27,6 +29,10 @@ echo ""
 "$SCRIPT_DIR/lock-check"
 echo ""
 "$SCRIPT_DIR/lint-check"
+echo ""
+"$SCRIPT_DIR/spell-check"
+echo ""
+"$SCRIPT_DIR/ha-version-sync"
 echo ""
 "$SCRIPT_DIR/type-check"
 echo ""

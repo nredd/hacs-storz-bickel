@@ -74,3 +74,23 @@ repos:
         files: ^(script/|\.devcontainer/)
         pass_filenames: true
 
+      # Conventional commit message format (required by release-please for semver bumping)
+      # Types mirror release-please-config.json changelog sections + revert.
+      - id: conventional-pre-commit
+        name: conventional commit
+        stages: [commit-msg]
+        entry: bash -c 'if command -v conventional-pre-commit &>/dev/null; then conventional-pre-commit feat fix perf refactor chore docs test ci revert "$@"; exit $?; fi; for venv in "$HOME/.local/ha-venv" ".local/ha-venv"; do if [[ -f "$venv/bin/conventional-pre-commit" ]]; then source "$venv/bin/activate" 2>/dev/null || true; conventional-pre-commit feat fix perf refactor chore docs test ci revert "$@"; exit $?; fi; done; echo "⚠️  Skipping conventional-pre-commit (venv not ready)"; exit 0' --
+        language: system
+        always_run: true
+        pass_filenames: false
+
+      # Spell checking
+      - id: codespell
+        name: codespell
+        entry: bash -c 'if command -v codespell &>/dev/null; then codespell "$@"; exit $?; fi; for venv in "$HOME/.local/ha-venv" ".local/ha-venv"; do if [[ -f "$venv/bin/codespell" ]]; then source "$venv/bin/activate" 2>/dev/null || true; codespell "$@"; exit $?; fi; done; echo "⚠️  Skipping codespell (venv not ready)"; exit 0' --
+        language: system
+        types_or: [python, markdown, rst]
+        exclude_types: [csv, json, html]
+        files: ^(custom_components/|tests/|script/|README\.md|CONTRIBUTING\.md|DEPENDENCIES\.md)
+        pass_filenames: true
+

@@ -40,6 +40,8 @@ dev = [
     "aioesphomeapi",
     "ruff>=0.15.0",
     "ty>=0.0.51",
+    "codespell>=2.4.1",
+    "conventional-pre-commit>=3.0",
     "colorlog==6.10.1",
     "zlib_ng==1.0.0",
     "isal==1.8.0",
@@ -168,6 +170,14 @@ property-decorators = ["propcache.api.cached_property"]
 
 [tool.ruff.lint.pyupgrade]
 keep-runtime-typing = true
+
+# --------------------------------------------------------------------------- #
+# codespell
+# --------------------------------------------------------------------------- #
+[tool.codespell]
+ignore-words-list = "aiport,astroid,checkin,currenty,hass,iif,incomfort,lookin,nam,NotIn"
+skip = "./.*,*.csv,*.json,*.ambr,uv.lock"
+quiet-level = 2
 
 # --------------------------------------------------------------------------- #
 # pytest
