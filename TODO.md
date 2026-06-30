@@ -1,5 +1,2 @@
 TODOs:
-
-- Add back codespell + release-notes hooks lol 
-- Simplify github action workflow step names
-- publish! 
+- publish 1.0.0 + release to HACS!

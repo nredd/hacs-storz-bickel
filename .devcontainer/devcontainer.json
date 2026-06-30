@@ -8,6 +8,10 @@
   // Each hook script sources .devcontainer/hooks/<name>.{pre,post}.sh when present.
   //
   // Runs once at container creation — fixes Docker volume mount point ownership.
+  // Runs on the host before the container is created — ensures ~/.gitconfig exists so
+  // Docker can bind-mount it (Docker refuses to mount a missing file source).
+  // touch is a no-op when the file already exists, so this is safe for local dev.
+  "initializeCommand": "touch \"$HOME/.gitconfig\"",
   "onCreateCommand": "bash .devcontainer/on-create.sh",
   // Runs at creation and on Codespaces pre-build refreshes — use for content-dependent setup.
   "updateContentCommand": "bash .devcontainer/update-content.sh",
