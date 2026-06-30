@@ -37,14 +37,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Create host gitconfig
-        # TODO(redd): remove this
-        # devcontainer.json bind-mounts ${localEnv:HOME}/.gitconfig; on a fresh CI
-        # runner that file doesn't exist and Docker refuses to mount a missing path,
-        # failing `devcontainer up`. An empty file satisfies the mount — setup-git.sh
-        # tolerates an empty host gitconfig.
-        run: touch "$HOME/.gitconfig"
-
       - name: Install devcontainer CLI
         # TODO(redd): delete??
         run: npm install -g @devcontainers/cli@0.87.0
