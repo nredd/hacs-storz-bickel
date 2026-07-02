@@ -139,6 +139,14 @@ async def test_volcano_heat_and_pump_triggers() -> None:
     assert client.writes[-1] == (c.VOLCANO_UUID_PUMP_OFF, c.VOLCANO_TRIGGER_PAYLOAD)
 
 
+async def test_volcano_auto_shutoff_triggers() -> None:
+    device, client = _make(VolcanoDevice)
+    await device.async_set_auto_shutoff(on=True)
+    assert client.writes[-1] == (c.VOLCANO_UUID_AUTO_SHUTOFF_ON, c.VOLCANO_TRIGGER_PAYLOAD)
+    await device.async_set_auto_shutoff(on=False)
+    assert client.writes[-1] == (c.VOLCANO_UUID_AUTO_SHUTOFF_OFF, c.VOLCANO_TRIGGER_PAYLOAD)
+
+
 @pytest.mark.parametrize(
     ("raw", "heater", "pump"),
     [
