@@ -175,8 +175,9 @@ class VolcanoDevice(SBDevice):
         self._fire_callbacks()
 
     async def async_set_auto_shutoff(self, *, on: bool) -> None:
-        """Enable or disable auto-shutoff (single byte 0/1)."""
-        await self._write(c.VOLCANO_UUID_AUTO_OFF_ENABLE, b"\x01" if on else b"\x00")
+        """Enable or disable auto-shutoff via the ON/OFF trigger characteristics."""
+        uuid = c.VOLCANO_UUID_AUTO_SHUTOFF_ON if on else c.VOLCANO_UUID_AUTO_SHUTOFF_OFF
+        await self._write(uuid, c.VOLCANO_TRIGGER_PAYLOAD)
         self._state.auto_shutoff_enabled = on
         self._fire_callbacks()
 
