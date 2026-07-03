@@ -1,5 +1,8 @@
 # Storz & Bickel for Home Assistant
 
+[![CI](https://github.com/nredd/hacs-storz-bickel/actions/workflows/ci.yml/badge.svg)](https://github.com/nredd/hacs-storz-bickel/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/nredd/hacs-storz-bickel/graph/badge.svg)](https://codecov.io/gh/nredd/hacs-storz-bickel)
+
 A fully native Home Assistant integration for **Storz & Bickel Bluetooth vaporizers** —
 control and monitor your device directly from Home Assistant over Bluetooth Low Energy.
 No cloud, no companion app: 100% local.
