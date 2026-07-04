@@ -12,12 +12,14 @@
 # Options:
 #   --cov           Generate coverage report (terminal output)
 #   --cov-html      Generate HTML coverage report in htmlcov/
+#   --cov-xml       Generate XML coverage report in coverage.xml (for Codecov upload)
 #
 # Examples:
 #   ./script/test
 #   ./script/test -v
 #   ./script/test --cov
 #   ./script/test --cov-html
+#   ./script/test --cov-xml
 #   ./script/test --cov -k test_midnight
 #   ./script/test tests/test_cache_validity.py
 
@@ -43,6 +45,10 @@ while [[ $# -gt 0 ]]; do
         ;;
     --cov-html)
         COVERAGE_ARGS+=("--cov=$INTEGRATION_PATH" "--cov-report=html")
+        shift
+        ;;
+    --cov-xml)
+        COVERAGE_ARGS+=("--cov=$INTEGRATION_PATH" "--cov-report=xml")
         shift
         ;;
     *)
