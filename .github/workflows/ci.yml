@@ -50,6 +50,13 @@ jobs:
       - name: Smoke
         run: devcontainer exec --workspace-folder . script/smoke
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          fail_ci_if_error: false
+
   hassfest:
     # https://developers.home-assistant.io/blog/2020/04/16/hassfest
     name: Hassfest validation
