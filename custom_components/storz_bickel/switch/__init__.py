@@ -18,6 +18,9 @@ if TYPE_CHECKING:
     from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
     from custom_components.storz_bickel.api import SBDevice, SBDeviceState
+    from custom_components.storz_bickel.coordinator import (
+        StorzBickelDataUpdateCoordinator,
+    )
     from custom_components.storz_bickel.data import StorzBickelConfigEntry
 
 PARALLEL_UPDATES = _PARALLEL_UPDATES
@@ -30,6 +33,14 @@ class StorzBickelSwitchEntityDescription(SwitchEntityDescription):
     capability: str
     is_on_fn: Callable[[SBDeviceState], bool | None]
     set_fn: Callable[[SBDevice, bool], Coroutine[Any, Any, None]]
+    # Invoked before turning on; raises to reject the request (e.g. cooldown).
+    turn_on_guard: Callable[[StorzBickelDataUpdateCoordinator], None] | None = None
+
+
+def _pump_turn_on_guard(coordinator: StorzBickelDataUpdateCoordinator) -> None:
+    """Reject pump turn-on requests while the post-off cooldown is running."""
+    if coordinator.pump_guard is not None:
+        coordinator.pump_guard.raise_if_cooldown_active()
 
 
 SWITCHES: tuple[StorzBickelSwitchEntityDescription, ...] = (
@@ -48,6 +59,7 @@ SWITCHES: tuple[StorzBickelSwitchEntityDescription, ...] = (
         icon="mdi:fan",
         is_on_fn=lambda state: state.pump_on,
         set_fn=lambda device, on: device.async_set_pump(on=on),
+        turn_on_guard=_pump_turn_on_guard,
     ),
     StorzBickelSwitchEntityDescription(
         key="vibration",
@@ -96,7 +108,14 @@ class StorzBickelSwitch(StorzBickelEntity, SwitchEntity):
         return self.entity_description.is_on_fn(self.data)
 
     async def async_turn_on(self, **_kwargs: Any) -> None:
-        """Turn the control on."""
+        """Turn the control on.
+
+        Raises:
+            ServiceValidationError: If the description's ``turn_on_guard``
+                rejects the request (e.g. the pump cooldown is active).
+        """
+        if (guard := self.entity_description.turn_on_guard) is not None:
+            guard(self.coordinator)
         await self.entity_description.set_fn(self.device, True)
 
     async def async_turn_off(self, **_kwargs: Any) -> None:

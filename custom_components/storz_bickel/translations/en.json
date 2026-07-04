@@ -18,6 +18,33 @@
       "not_supported": "This device is not a supported Storz & Bickel vaporizer"
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Pump protections",
+        "data": {
+          "pump_failsafe_enabled": "Pump failsafe",
+          "pump_failsafe_seconds": "Pump failsafe window",
+          "pump_cooldown_enabled": "Pump cooldown",
+          "pump_cooldown_seconds": "Pump cooldown duration"
+        },
+        "data_description": {
+          "pump_failsafe_enabled": "Automatically turn the pump off after it has been running for the failsafe window.",
+          "pump_failsafe_seconds": "How long the pump may run before the failsafe turns it off.",
+          "pump_cooldown_enabled": "Prevent turning the pump back on right after it turns off.",
+          "pump_cooldown_seconds": "How long to wait after the pump turns off before it may be turned on again."
+        }
+      }
+    },
+    "abort": {
+      "no_options_available": "This device has no configurable options."
+    }
+  },
+  "exceptions": {
+    "pump_cooldown_active": {
+      "message": "The pump was just turned off; wait {remaining} more seconds before turning it on again."
+    }
+  },
   "entity": {
     "binary_sensor": {
       "heater": { "name": "Heating" },

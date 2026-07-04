@@ -13,6 +13,17 @@ ATTRIBUTION = "Data provided by the Storz & Bickel device over Bluetooth"
 # Config entry data keys.
 CONF_DEVICE_TYPE = "device_type"
 
+# Config entry option keys (per-device pump protections).
+CONF_PUMP_FAILSAFE_ENABLED = "pump_failsafe_enabled"
+CONF_PUMP_FAILSAFE_SECONDS = "pump_failsafe_seconds"
+CONF_PUMP_COOLDOWN_ENABLED = "pump_cooldown_enabled"
+CONF_PUMP_COOLDOWN_SECONDS = "pump_cooldown_seconds"
+
+DEFAULT_PUMP_FAILSAFE_ENABLED = True
+DEFAULT_PUMP_FAILSAFE_SECONDS = 45
+DEFAULT_PUMP_COOLDOWN_ENABLED = True
+DEFAULT_PUMP_COOLDOWN_SECONDS = 5
+
 # Entities are updated from a single coordinator; serialize platform updates.
 PARALLEL_UPDATES = 0
 

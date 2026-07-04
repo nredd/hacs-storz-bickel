@@ -12,14 +12,18 @@ from typing import TYPE_CHECKING
 from homeassistant.components import bluetooth
 from homeassistant.config_entries import ConfigFlow
 from homeassistant.const import CONF_ADDRESS
+from homeassistant.core import callback
 import voluptuous as vol
 
 from custom_components.storz_bickel.api import detect_device_type
+from custom_components.storz_bickel.config_flow_handler.options_flow import (
+    StorzBickelOptionsFlowHandler,
+)
 from custom_components.storz_bickel.const import CONF_DEVICE_TYPE, DOMAIN
 
 if TYPE_CHECKING:
     from homeassistant.components.bluetooth import BluetoothServiceInfoBleak
-    from homeassistant.config_entries import ConfigFlowResult
+    from homeassistant.config_entries import ConfigEntry, ConfigFlowResult
 
     from custom_components.storz_bickel.api import DeviceType
 
@@ -28,6 +32,14 @@ class StorzBickelConfigFlowHandler(ConfigFlow, domain=DOMAIN):
     """Handle the config flow for Storz & Bickel devices."""
 
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: ConfigEntry,  # noqa: ARG004 - name fixed by the base class
+    ) -> StorzBickelOptionsFlowHandler:
+        """Return the options flow handler for an entry."""
+        return StorzBickelOptionsFlowHandler()
 
     def __init__(self) -> None:
         """Initialize the flow's discovery state."""

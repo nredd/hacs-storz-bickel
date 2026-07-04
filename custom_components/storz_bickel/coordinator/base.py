@@ -21,7 +21,19 @@ from custom_components.storz_bickel.api import (
     StorzBickelConnectionError,
     StorzBickelError,
 )
-from custom_components.storz_bickel.const import DOMAIN, LOGGER
+from custom_components.storz_bickel.const import (
+    CONF_PUMP_COOLDOWN_ENABLED,
+    CONF_PUMP_COOLDOWN_SECONDS,
+    CONF_PUMP_FAILSAFE_ENABLED,
+    CONF_PUMP_FAILSAFE_SECONDS,
+    DEFAULT_PUMP_COOLDOWN_ENABLED,
+    DEFAULT_PUMP_COOLDOWN_SECONDS,
+    DEFAULT_PUMP_FAILSAFE_ENABLED,
+    DEFAULT_PUMP_FAILSAFE_SECONDS,
+    DOMAIN,
+    LOGGER,
+)
+from custom_components.storz_bickel.coordinator.pump_guard import StorzBickelPumpGuard
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -58,10 +70,31 @@ class StorzBickelDataUpdateCoordinator(DataUpdateCoordinator[SBDeviceState]):
             update_interval=timedelta(seconds=update_interval_seconds),
         )
         self.device = device
+        options = config_entry.options
+        self.pump_guard: StorzBickelPumpGuard | None = None
+        if device.capabilities.pump:
+            self.pump_guard = StorzBickelPumpGuard(
+                hass,
+                device,
+                failsafe_enabled=options.get(
+                    CONF_PUMP_FAILSAFE_ENABLED, DEFAULT_PUMP_FAILSAFE_ENABLED
+                ),
+                failsafe_seconds=options.get(
+                    CONF_PUMP_FAILSAFE_SECONDS, DEFAULT_PUMP_FAILSAFE_SECONDS
+                ),
+                cooldown_enabled=options.get(
+                    CONF_PUMP_COOLDOWN_ENABLED, DEFAULT_PUMP_COOLDOWN_ENABLED
+                ),
+                cooldown_seconds=options.get(
+                    CONF_PUMP_COOLDOWN_SECONDS, DEFAULT_PUMP_COOLDOWN_SECONDS
+                ),
+            )
         self._unregister_callback = device.register_callback(self._handle_device_update)
 
     def _handle_device_update(self, state: SBDeviceState) -> None:
         """Push a notification-driven state update to all entities."""
+        if self.pump_guard is not None:
+            self.pump_guard.handle_state(state)
         self.async_set_updated_data(state)
 
     async def _async_setup(self) -> None:
@@ -75,9 +108,14 @@ class StorzBickelDataUpdateCoordinator(DataUpdateCoordinator[SBDeviceState]):
         """Ensure the connection is alive and poll the current temperature."""
         try:
             await self._ensure_connected()
-            return await self.device.async_poll()
+            state = await self.device.async_poll()
         except StorzBickelError as err:
             raise UpdateFailed(str(err)) from err
+        # Polled updates bypass the device callback, so feed the guard here too;
+        # edge detection makes duplicate observations harmless.
+        if self.pump_guard is not None:
+            self.pump_guard.handle_state(state)
+        return state
 
     async def _ensure_connected(self) -> None:
         """Reconnect if needed, resolving the latest BLEDevice from HA Bluetooth."""
@@ -96,6 +134,8 @@ class StorzBickelDataUpdateCoordinator(DataUpdateCoordinator[SBDeviceState]):
 
     async def async_shutdown(self) -> None:
         """Disconnect from the device and tear down the coordinator."""
+        if self.pump_guard is not None:
+            self.pump_guard.async_shutdown()
         await super().async_shutdown()
         self._unregister_callback()
         await self.device.async_disconnect()
