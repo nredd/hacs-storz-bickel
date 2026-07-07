@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# script/card: Build the companion Lovelace card bundle
+#
+# Installs the card's locked dependencies (if needed) and bundles
+# card/src/storz-bickel-card.ts into the integration's www/ directory, where
+# it ships with the HACS install and is served by the integration.
+#
+# The bundle MUST be rebuilt and committed whenever card/src changes; CI
+# enforces this with a git-diff check (see script/card-check).
+#
+# Usage:
+#   ./script/card
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR/.."
+
+# shellcheck source=script/.lib/output.sh
+source "$SCRIPT_DIR/.lib/output.sh"
+# shellcheck source=script/.lib/card.sh
+source "$SCRIPT_DIR/.lib/card.sh"
+
+require_bun
+
+run_hook "card" "pre"
+
+log_header "Building the Lovelace card"
+card_install
+(cd card && bun run build)
+
+run_hook "card" "post"
+log_success "Card bundle written to custom_components/storz_bickel/www/storz-bickel-card.js"

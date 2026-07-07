@@ -25,6 +25,8 @@ run_hook "spell-check" "pre"
 log_header "Checking spelling with codespell"
 uv run codespell \
     custom_components/ \
+    card/src/ \
+    card/test/ \
     README.md \
     CONTRIBUTING.md \
     DEPENDENCIES.md \

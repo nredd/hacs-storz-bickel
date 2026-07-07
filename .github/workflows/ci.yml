@@ -2,7 +2,8 @@ name: CI
 
 # Single CI workflow for the integration. Combines what used to live in
 # ci.yml + validate.yml + ha-version-sync-check.yml:
-#   * smoke           lint + type + test, run INSIDE the real devcontainer image
+#   * smoke           lint + type + test + card gate, run INSIDE the real devcontainer
+#                     image (script/smoke covers the Lovelace card via script/card-check)
 #   * hassfest        Home Assistant integration manifest validation
 #   * hacs            HACS repository validation
 #
