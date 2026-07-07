@@ -24,6 +24,11 @@ DEFAULT_PUMP_FAILSAFE_SECONDS = 45
 DEFAULT_PUMP_COOLDOWN_ENABLED = True
 DEFAULT_PUMP_COOLDOWN_SECONDS = 5
 
+# Bundled Lovelace card, served by the integration and injected into the
+# frontend on setup (see async_setup in __init__.py).
+CARD_FILENAME = "storz-bickel-card.js"
+CARD_URL = f"/{DOMAIN}/{CARD_FILENAME}"
+
 # Entities are updated from a single coordinator; serialize platform updates.
 PARALLEL_UPDATES = 0
 

@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# script/card-check: Full card gate — lint, types, tests, build, drift check
+#
+# Mirrors the "Card" job in .github/workflows/ci.yml exactly:
+#   card-lint-check   Biome lint + format verification (no writes)
+#   card-type-check   Strict tsc --noEmit
+#   card-test         bun test with coverage
+#   card              Rebuild the committed bundle
+#   drift check       git diff must be clean for the committed www/ bundle
+#
+# Usage:
+#   ./script/card-check
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR/.."
+
+# shellcheck source=script/.lib/output.sh
+source "$SCRIPT_DIR/.lib/output.sh"
+# shellcheck source=script/.lib/card.sh
+source "$SCRIPT_DIR/.lib/card.sh"
+
+require_bun
+
+run_hook "card-check" "pre"
+
+"$SCRIPT_DIR/card-lint-check"
+echo ""
+"$SCRIPT_DIR/card-type-check"
+echo ""
+"$SCRIPT_DIR/card-test"
+echo ""
+"$SCRIPT_DIR/card"
+echo ""
+
+log_header "Verifying committed card bundle matches sources"
+if ! git diff --exit-code -- custom_components/storz_bickel/www/; then
+    log_error "Committed bundle is stale — run script/card and commit the result"
+    exit 1
+fi
+log_success "Committed bundle is up to date"
+
+run_hook "card-check" "post"
+log_success "Card check passed"

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# script/card-test: Run the card's unit tests with bun test
+#
+# Executes the Jest-compatible bun test runner against card/test/ (happy-dom
+# provides the DOM) and prints a coverage summary.
+#
+# Usage:
+#   ./script/card-test [BUN_TEST_OPTIONS]
+#
+# Examples:
+#   ./script/card-test
+#   ./script/card-test --watch
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR/.."
+
+# shellcheck source=script/.lib/output.sh
+source "$SCRIPT_DIR/.lib/output.sh"
+# shellcheck source=script/.lib/card.sh
+source "$SCRIPT_DIR/.lib/card.sh"
+
+require_bun
+
+run_hook "card-test" "pre"
+
+log_header "Running card tests"
+card_install
+(cd card && bun test --coverage "$@")
+
+run_hook "card-test" "post"
+log_success "Card tests completed"

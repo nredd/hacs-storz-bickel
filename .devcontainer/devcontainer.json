@@ -52,6 +52,8 @@
     "ghcr.io/devcontainers/features/node:2": {
       "version": "lts"
     },
+    // Bun powers the companion Lovelace card toolchain (script/card-*).
+    "ghcr.io/shyim/devcontainers-features/bun:0": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers-extra/features/apt-packages:1": {
       "packages": [

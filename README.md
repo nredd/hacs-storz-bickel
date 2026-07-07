@@ -31,6 +31,29 @@ Supported devices:
 See [`docs/user/`](docs/user/GETTING_STARTED.md) for setup, the full per-model entity table, and
 automation/dashboard examples.
 
+## Companion Lovelace card
+
+The integration bundles a custom dashboard card — no extra HACS install, no manual resource
+registration. Once the integration is set up, open any dashboard, **Add card**, and search for
+**Storz & Bickel Card**. The visual editor lets you pick the device and preset temperatures; the
+equivalent YAML is:
+
+```yaml
+type: custom:storz-bickel-card
+device: <device_id>        # pick via the visual editor
+presets: [175, 185, 195]   # optional preset temperature chips
+name: Volcano              # optional title override
+```
+
+The card is a thermostat-style dial with the current temperature as an animated arc (amber while
+heating, green at target), −/+ steppers, a heat pill, preset chips, and a pump bar with an airflow
+shimmer while running. It adapts to the configured device: the pump bar appears only on the
+Volcano, the battery chip only on portables, and boost/vibration rows only where supported. Entity
+lookups go through the registry, so renaming entities never breaks the card.
+
+> **Auto-shutoff display.** The card shows the configured auto-shutoff minutes; the devices do not
+> expose a live ticking countdown.
+
 ## Requirements
 
 - Home Assistant with a working Bluetooth adapter (e.g. Raspberry Pi 5 built-in Bluetooth) or an
@@ -78,6 +101,17 @@ uv run pytest                # tests
 **inside the project's devcontainer image** (via [`devcontainers/ci`](https://github.com/devcontainers/ci)),
 so local development and CI share one environment. Open the repo in the devcontainer (VS Code /
 Codespaces) to get the same toolchain.
+
+The companion card (`card/`) has its own toolchain — [Bun](https://bun.sh) for install/build/test
+and [Biome](https://biomejs.dev) for lint/format, the TypeScript analogues of `uv`/`ruff`. The
+built bundle is **committed** at `custom_components/storz_bickel/www/storz-bickel-card.js` so HACS
+ships it; rebuild and commit it with any `card/src` change (CI's `card` job fails on drift).
+See [`docs/development/CARD.md`](docs/development/CARD.md).
+
+```bash
+script/card-check   # full gate: Biome + tsc + bun test + build + drift check
+script/card         # rebuild the bundle after editing card/src
+```
 
 ### Live BLE check (host-only)
 

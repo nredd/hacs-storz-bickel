@@ -1,0 +1,24 @@
+{
+  "name": "storz-bickel-card",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Companion Lovelace card for the Storz & Bickel Home Assistant integration.",
+  "scripts": {
+    "build": "NODE_ENV=production bun build src/storz-bickel-card.ts --outfile=../custom_components/storz_bickel/www/storz-bickel-card.js --minify --format=esm --target=browser",
+    "dev": "bun build src/storz-bickel-card.ts --outfile=../custom_components/storz_bickel/www/storz-bickel-card.js --format=esm --target=browser --watch",
+    "check": "tsc --noEmit",
+    "lint": "biome ci .",
+    "lint:fix": "biome check --write .",
+    "test": "bun test --coverage"
+  },
+  "dependencies": {
+    "lit": "^3.3.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.2",
+    "@happy-dom/global-registrator": "^20.10.6",
+    "@types/bun": "^1.3.14",
+    "typescript": "^6.0.3"
+  }
+}
