@@ -41,7 +41,7 @@ if [ -z "${CI:-}" ] && [ -z "${GITHUB_ACTIONS:-}" ] && { [ -d "$SCRIPT_DIR/../.l
     "$SCRIPT_DIR/hassfest"
 fi
 
-# Run the card gate when Bun is available (CI covers it in a dedicated job;
+# Run the card gate when Bun is available (CI covers it via script/smoke;
 # Python-only environments skip it rather than fail)
 if command -v bun >/dev/null 2>&1; then
     echo ""

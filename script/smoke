@@ -10,6 +10,7 @@
 #   ha-version-sync  HA release-train consistency
 #   type-check     Python type checking (ty)
 #   test           Run the test suite (pytest), emitting coverage.xml for Codecov
+#   card-check     Card gate: Biome, tsc, bun test, build + www/ drift check
 #
 # Usage:
 #   ./script/smoke
@@ -37,6 +38,8 @@ echo ""
 "$SCRIPT_DIR/type-check"
 echo ""
 "$SCRIPT_DIR/test" --cov-xml
+echo ""
+"$SCRIPT_DIR/card-check"
 
 run_hook "smoke" "post"
 

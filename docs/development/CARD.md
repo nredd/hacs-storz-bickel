@@ -37,8 +37,10 @@ toolchain — the TypeScript analogue of the Python side's `uv`/`ruff`/`ty`:
 | Lint + format  | Biome (`biome ci` / `biome check --write`) |
 | Types          | strict `tsc --noEmit`                      |
 
-Bun is pinned in `card/.bun-version` (used by `oven-sh/setup-bun` in CI) so the committed bundle is
-reproducible. The build sets `NODE_ENV=production` to select Lit's production export condition.
+Bun is pinned in `card/.bun-version` (kept in sync with the bun feature version in
+`.devcontainer/devcontainer.json`, which is what CI's devcontainer-based `Smoke` job uses) so the
+committed bundle is reproducible. The build sets `NODE_ENV=production` to select Lit's production
+export condition.
 
 ## Development workflow
 
@@ -51,8 +53,9 @@ script/card-test        # bun test --coverage
 script/card-check       # the full gate, exactly as CI runs it
 ```
 
-**The bundle must be rebuilt and committed with any `card/src` change.** CI's `card` job rebuilds
-and fails on `git diff` drift in `www/`. `script/check` runs `script/card-check` automatically when
+**The bundle must be rebuilt and committed with any `card/src` change.** CI's `Smoke` job (via
+`script/smoke` → `script/card-check`) rebuilds and fails on `git diff` drift in `www/`.
+`script/check` runs `script/card-check` automatically when
 Bun is available (and skips it otherwise, so Python-only environments still pass).
 
 ## Architecture notes

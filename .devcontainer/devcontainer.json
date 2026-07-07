@@ -53,7 +53,12 @@
       "version": "lts"
     },
     // Bun powers the companion Lovelace card toolchain (script/card-*).
-    "ghcr.io/shyim/devcontainers-features/bun:0": {},
+    // Version MUST stay in sync with card/.bun-version so the committed www/
+    // bundle is reproducible — a Bun upgrade can change bundler output and
+    // fail the drift check in script/card-check with no source change.
+    "ghcr.io/shyim/devcontainers-features/bun:0": {
+      "version": "1.3.14"
+    },
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers-extra/features/apt-packages:1": {
       "packages": [

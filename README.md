@@ -105,7 +105,7 @@ Codespaces) to get the same toolchain.
 The companion card (`card/`) has its own toolchain — [Bun](https://bun.sh) for install/build/test
 and [Biome](https://biomejs.dev) for lint/format, the TypeScript analogues of `uv`/`ruff`. The
 built bundle is **committed** at `custom_components/storz_bickel/www/storz-bickel-card.js` so HACS
-ships it; rebuild and commit it with any `card/src` change (CI's `card` job fails on drift).
+ships it; rebuild and commit it with any `card/src` change (CI's `Smoke` job fails on drift).
 See [`docs/development/CARD.md`](docs/development/CARD.md).
 
 ```bash
