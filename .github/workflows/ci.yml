@@ -38,18 +38,66 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      - name: Set up Docker Buildx
+        # docker-container driver is required for the GHA cache backend used below.
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Restore card Bun dependencies
+        # card/node_modules lives on the bind-mounted workspace (unlike the
+        # ha_venv/uv_cache named volumes below), so a plain cache works directly.
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: card/node_modules
+          key: bun-modules-${{ runner.os }}-${{ hashFiles('card/bun.lock') }}
+          restore-keys: |
+            bun-modules-${{ runner.os }}-
+
+      - name: Restore uv package cache
+        # UV_CACHE_DIR lives in a named Docker volume, not a host path, so we
+        # cache a tar snapshot and seed/dump the volume around the container run.
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: /tmp/docker-cache/uv-cache.tar
+          key: uv-cache-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-cache-${{ runner.os }}-
+
+      - name: Seed uv cache volume
+        run: |
+          set -euo pipefail
+          echo "VOLUME_PREFIX=$(basename "$GITHUB_WORKSPACE")" >> "$GITHUB_ENV"
+          mkdir -p /tmp/docker-cache
+          docker volume create "$(basename "$GITHUB_WORKSPACE")_uv_cache"
+          if [ -f /tmp/docker-cache/uv-cache.tar ]; then
+            docker run --rm \
+              -v "$(basename "$GITHUB_WORKSPACE")_uv_cache":/target \
+              -v /tmp/docker-cache:/backup \
+              alpine tar -xf /backup/uv-cache.tar -C /target
+          fi
+
       - name: Install devcontainer CLI
         # TODO(redd): delete??
         run: npm install -g @devcontainers/cli@0.87.0
 
       - name: Build
-        run: devcontainer build --workspace-folder .
+        run: |
+          devcontainer build --workspace-folder . \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max
 
       - name: Start
         run: devcontainer up --workspace-folder .
 
       - name: Smoke
         run: devcontainer exec --workspace-folder . script/smoke
+
+      - name: Dump uv cache volume
+        if: always()
+        run: |
+          docker run --rm \
+            -v "${VOLUME_PREFIX}_uv_cache":/source \
+            -v /tmp/docker-cache:/backup \
+            alpine tar -cf /backup/uv-cache.tar -C /source .
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
