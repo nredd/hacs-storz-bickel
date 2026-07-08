@@ -21,28 +21,30 @@
   "options": {
     "step": {
       "init": {
-        "title": "Pump protections",
+        "title": "Device options",
         "data": {
+          "temperature_unit": "Climate entity temperature unit",
           "pump_failsafe_enabled": "Pump failsafe",
           "pump_failsafe_seconds": "Pump failsafe window",
           "pump_cooldown_enabled": "Pump cooldown",
           "pump_cooldown_seconds": "Pump cooldown duration"
         },
         "data_description": {
+          "temperature_unit": "Unit the climate entity displays temperatures in, independent of the device's own screen and Home Assistant's system-wide unit.",
           "pump_failsafe_enabled": "Automatically turn the pump off after it has been running for the failsafe window.",
           "pump_failsafe_seconds": "How long the pump may run before the failsafe turns it off.",
           "pump_cooldown_enabled": "Prevent turning the pump back on right after it turns off.",
           "pump_cooldown_seconds": "How long to wait after the pump turns off before it may be turned on again."
         }
       }
-    },
-    "abort": {
-      "no_options_available": "This device has no configurable options."
     }
   },
   "exceptions": {
     "pump_cooldown_active": {
       "message": "The pump was just turned off; wait {remaining} more seconds before turning it on again."
+    },
+    "workflow_already_running": {
+      "message": "A workflow is already running; stop it before starting another."
     }
   },
   "entity": {
@@ -72,7 +74,13 @@
       "heater": { "name": "Heater" },
       "pump": { "name": "Pump" },
       "vibration": { "name": "Vibration" },
-      "auto_shutoff_enabled": { "name": "Auto shutoff" }
+      "auto_shutoff_enabled": { "name": "Auto shutoff" },
+      "fahrenheit_display": { "name": "Fahrenheit display" }
+    },
+    "button": {
+      "workflow_full_session": { "name": "Full session" },
+      "workflow_fill_balloon": { "name": "Fill balloon" },
+      "workflow_stop": { "name": "Stop workflow" }
     }
   }
 }

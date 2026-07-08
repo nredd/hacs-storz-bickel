@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from logging import Logger, getLogger
 
+from homeassistant.const import UnitOfTemperature
+
 LOGGER: Logger = getLogger(__package__)
 
 DOMAIN = "storz_bickel"
@@ -23,6 +25,16 @@ DEFAULT_PUMP_FAILSAFE_ENABLED = True
 DEFAULT_PUMP_FAILSAFE_SECONDS = 45
 DEFAULT_PUMP_COOLDOWN_ENABLED = True
 DEFAULT_PUMP_COOLDOWN_SECONDS = 5
+
+# Config entry option key for the climate entity's display unit (independent of
+# the device's own on-screen unit and of Home Assistant's system-wide setting).
+CONF_TEMPERATURE_UNIT = "temperature_unit"
+DEFAULT_TEMPERATURE_UNIT = UnitOfTemperature.CELSIUS
+
+# Bounds how long a workflow will wait for a temperature rung to be reached
+# before giving up (generous enough for a cold start to 170C, still bounds a
+# stalled/disconnected device).
+WORKFLOW_TEMPERATURE_WAIT_TIMEOUT_SECONDS = 600
 
 # Bundled Lovelace card, served by the integration and injected into the
 # frontend on setup (see async_setup in __init__.py).

@@ -43,6 +43,7 @@ class DeviceCapabilities:
     battery: bool = False
     hours_of_operation: bool = False
     heater_runtime: bool = False
+    temperature_unit_display: bool = False
 
 
 @dataclass(slots=True)
