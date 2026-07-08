@@ -11,8 +11,16 @@ from homeassistant.components.climate import (
     HVACMode,
 )
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
+from homeassistant.util.unit_conversion import (
+    TemperatureConverter,
+    TemperatureDeltaConverter,
+)
 
-from custom_components.storz_bickel.const import PARALLEL_UPDATES as _PARALLEL_UPDATES
+from custom_components.storz_bickel.const import (
+    CONF_TEMPERATURE_UNIT,
+    DEFAULT_TEMPERATURE_UNIT,
+    PARALLEL_UPDATES as _PARALLEL_UPDATES,
+)
 from custom_components.storz_bickel.entity import StorzBickelEntity
 
 if TYPE_CHECKING:
@@ -40,7 +48,6 @@ class StorzBickelClimate(StorzBickelEntity, ClimateEntity):
     """The vaporizer heater as a climate entity (heat/off + target temperature)."""
 
     _attr_name = None
-    _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
     _attr_supported_features = (
         ClimateEntityFeature.TARGET_TEMPERATURE
@@ -51,21 +58,44 @@ class StorzBickelClimate(StorzBickelEntity, ClimateEntity):
 
     def __init__(self, coordinator: StorzBickelDataUpdateCoordinator) -> None:
         """Initialize the climate entity with device-specific temperature limits."""
-        super().__init__(coordinator, ClimateEntityDescription(key="heater"))
+        super().__init__(
+            coordinator, ClimateEntityDescription(key="heater", translation_key="heater")
+        )
         device = coordinator.device
-        self._attr_min_temp = device.temp_min
-        self._attr_max_temp = device.temp_max
-        self._attr_target_temperature_step = device.temp_step
+        self._attr_temperature_unit = coordinator.config_entry.options.get(
+            CONF_TEMPERATURE_UNIT, DEFAULT_TEMPERATURE_UNIT
+        )
+        self._attr_min_temp = self._to_display(device.temp_min)
+        self._attr_max_temp = self._to_display(device.temp_max)
+        self._attr_target_temperature_step = TemperatureDeltaConverter.convert(
+            device.temp_step, UnitOfTemperature.CELSIUS, self._attr_temperature_unit
+        )
+
+    def _to_display(self, celsius: float) -> float:
+        """Convert an absolute Celsius value to the entity's display unit."""
+        return TemperatureConverter.convert(
+            celsius, UnitOfTemperature.CELSIUS, self._attr_temperature_unit
+        )
+
+    def _to_celsius(self, value: float) -> float:
+        """Convert an absolute value in the entity's display unit to Celsius."""
+        return TemperatureConverter.convert(
+            value, self._attr_temperature_unit, UnitOfTemperature.CELSIUS
+        )
 
     @property
     def current_temperature(self) -> float | None:
         """Return the current chamber temperature."""
-        return self.data.current_temperature
+        if self.data.current_temperature is None:
+            return None
+        return self._to_display(self.data.current_temperature)
 
     @property
     def target_temperature(self) -> float | None:
         """Return the heater setpoint."""
-        return self.data.target_temperature
+        if self.data.target_temperature is None:
+            return None
+        return self._to_display(self.data.target_temperature)
 
     @property
     def hvac_mode(self) -> HVACMode | None:
@@ -78,7 +108,9 @@ class StorzBickelClimate(StorzBickelEntity, ClimateEntity):
         """Set a new heater target temperature."""
         temperature = kwargs.get(ATTR_TEMPERATURE)
         if temperature is not None:
-            await self.device.async_set_target_temperature(float(temperature))
+            await self.device.async_set_target_temperature(
+                self._to_celsius(float(temperature))
+            )
 
     async def async_turn_on(self) -> None:
         """Turn the heater on."""

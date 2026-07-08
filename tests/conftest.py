@@ -70,6 +70,9 @@ class FakeDevice:
         self.name = "Volcano Test"
         self.connected = False
         self.pump_calls: list[bool] = []
+        self.heater_calls: list[bool] = []
+        self.target_temperature_calls: list[float] = []
+        self.fahrenheit_calls: list[bool] = []
         self._callbacks: list[Callable[[SBDeviceState], None]] = []
         self._state = SBDeviceState(
             current_temperature=40.0,
@@ -124,6 +127,24 @@ class FakeDevice:
         """Record the pump command and mirror the real optimistic write."""
         self.pump_calls.append(on)
         self.push_status(pump_on=on)
+
+    async def async_set_heater(self, *, on: bool) -> None:
+        """Record the heater command and mirror the real optimistic write."""
+        self.heater_calls.append(on)
+        self._state.heater_on = on
+        self.fire()
+
+    async def async_set_target_temperature(self, celsius: float) -> None:
+        """Record the target-temperature command and mirror the optimistic write."""
+        self.target_temperature_calls.append(celsius)
+        self._state.target_temperature = celsius
+        self.fire()
+
+    async def async_set_fahrenheit(self, *, on: bool) -> None:
+        """Record the Fahrenheit-display command and mirror the optimistic write."""
+        self.fahrenheit_calls.append(on)
+        self._state.fahrenheit = on
+        self.fire()
 
 
 @pytest.fixture

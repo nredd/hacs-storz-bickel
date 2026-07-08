@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
 from homeassistant.config_entries import ConfigEntryState
-from homeassistant.const import CONF_ADDRESS
+from homeassistant.const import CONF_ADDRESS, UnitOfTemperature
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -16,10 +16,12 @@ from custom_components.storz_bickel.const import (
     CONF_PUMP_COOLDOWN_SECONDS,
     CONF_PUMP_FAILSAFE_ENABLED,
     CONF_PUMP_FAILSAFE_SECONDS,
+    CONF_TEMPERATURE_UNIT,
     DEFAULT_PUMP_COOLDOWN_ENABLED,
     DEFAULT_PUMP_COOLDOWN_SECONDS,
     DEFAULT_PUMP_FAILSAFE_ENABLED,
     DEFAULT_PUMP_FAILSAFE_SECONDS,
+    DEFAULT_TEMPERATURE_UNIT,
     DOMAIN,
 )
 
@@ -51,6 +53,7 @@ async def test_options_flow_defaults_and_save(
     schema = result["data_schema"]
     assert schema is not None
     assert schema({}) == {
+        CONF_TEMPERATURE_UNIT: DEFAULT_TEMPERATURE_UNIT,
         CONF_PUMP_FAILSAFE_ENABLED: DEFAULT_PUMP_FAILSAFE_ENABLED,
         CONF_PUMP_FAILSAFE_SECONDS: DEFAULT_PUMP_FAILSAFE_SECONDS,
         CONF_PUMP_COOLDOWN_ENABLED: DEFAULT_PUMP_COOLDOWN_ENABLED,
@@ -65,6 +68,7 @@ async def test_options_flow_defaults_and_save(
         result = await hass.config_entries.options.async_configure(
             result["flow_id"],
             user_input={
+                CONF_TEMPERATURE_UNIT: UnitOfTemperature.FAHRENHEIT,
                 CONF_PUMP_FAILSAFE_ENABLED: True,
                 CONF_PUMP_FAILSAFE_SECONDS: 60,
                 CONF_PUMP_COOLDOWN_ENABLED: False,
@@ -75,6 +79,7 @@ async def test_options_flow_defaults_and_save(
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert entry.options == {
+        CONF_TEMPERATURE_UNIT: UnitOfTemperature.FAHRENHEIT,
         CONF_PUMP_FAILSAFE_ENABLED: True,
         CONF_PUMP_FAILSAFE_SECONDS: 60,
         CONF_PUMP_COOLDOWN_ENABLED: False,
@@ -113,6 +118,7 @@ async def test_options_prefilled_from_existing(
     schema = result["data_schema"]
     assert schema is not None
     assert schema({}) == {
+        CONF_TEMPERATURE_UNIT: DEFAULT_TEMPERATURE_UNIT,
         CONF_PUMP_FAILSAFE_ENABLED: False,
         CONF_PUMP_FAILSAFE_SECONDS: 120,
         CONF_PUMP_COOLDOWN_ENABLED: True,
@@ -120,10 +126,10 @@ async def test_options_prefilled_from_existing(
     }
 
 
-async def test_options_abort_for_non_pump_device(
+async def test_options_form_shows_for_non_pump_device(
     hass: HomeAssistant, enable_bluetooth: None
 ) -> None:
-    """Devices without a pump (e.g. Crafty) have no configurable options."""
+    """Devices without a pump (e.g. Crafty) still get the temperature unit option."""
     entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id="11:22:33:44:55:66",
@@ -138,5 +144,9 @@ async def test_options_abort_for_non_pump_device(
         await hass.async_block_till_done()
 
     result = await hass.config_entries.options.async_init(entry.entry_id)
-    assert result["type"] is FlowResultType.ABORT
-    assert result["reason"] == "no_options_available"
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "init"
+
+    schema = result["data_schema"]
+    assert schema is not None
+    assert schema({}) == {CONF_TEMPERATURE_UNIT: DEFAULT_TEMPERATURE_UNIT}
