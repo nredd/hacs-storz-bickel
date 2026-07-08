@@ -34,6 +34,7 @@ from custom_components.storz_bickel.const import (
     LOGGER,
 )
 from custom_components.storz_bickel.coordinator.pump_guard import StorzBickelPumpGuard
+from custom_components.storz_bickel.workflow import StorzBickelWorkflowRunner
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -72,6 +73,7 @@ class StorzBickelDataUpdateCoordinator(DataUpdateCoordinator[SBDeviceState]):
         self.device = device
         options = config_entry.options
         self.pump_guard: StorzBickelPumpGuard | None = None
+        self.workflow_runner: StorzBickelWorkflowRunner | None = None
         if device.capabilities.pump:
             self.pump_guard = StorzBickelPumpGuard(
                 hass,
@@ -89,6 +91,7 @@ class StorzBickelDataUpdateCoordinator(DataUpdateCoordinator[SBDeviceState]):
                     CONF_PUMP_COOLDOWN_SECONDS, DEFAULT_PUMP_COOLDOWN_SECONDS
                 ),
             )
+            self.workflow_runner = StorzBickelWorkflowRunner(hass, config_entry, self)
         self._unregister_callback = device.register_callback(self._handle_device_update)
 
     def _handle_device_update(self, state: SBDeviceState) -> None:
@@ -136,6 +139,8 @@ class StorzBickelDataUpdateCoordinator(DataUpdateCoordinator[SBDeviceState]):
         """Disconnect from the device and tear down the coordinator."""
         if self.pump_guard is not None:
             self.pump_guard.async_shutdown()
+        if self.workflow_runner is not None:
+            self.workflow_runner.async_shutdown()
         await super().async_shutdown()
         self._unregister_callback()
         await self.device.async_disconnect()

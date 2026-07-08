@@ -79,6 +79,15 @@ SWITCHES: tuple[StorzBickelSwitchEntityDescription, ...] = (
         is_on_fn=lambda state: state.auto_shutoff_enabled,
         set_fn=lambda device, on: device.async_set_auto_shutoff(on=on),
     ),
+    StorzBickelSwitchEntityDescription(
+        key="fahrenheit_display",
+        translation_key="fahrenheit_display",
+        capability="temperature_unit_display",
+        entity_category=EntityCategory.CONFIG,
+        icon="mdi:thermometer",
+        is_on_fn=lambda state: state.fahrenheit,
+        set_fn=lambda device, on: device.async_set_fahrenheit(on=on),
+    ),
 )
 
 

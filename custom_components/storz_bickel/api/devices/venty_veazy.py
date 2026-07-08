@@ -51,6 +51,7 @@ class VentyVeazyDevice(SBDevice):
         boost_temperature=True,
         battery=True,
         heater_runtime=True,
+        temperature_unit_display=True,
     )
     temp_min = c.PORTABLE_TEMP_MIN
     temp_max = c.PORTABLE_TEMP_MAX
@@ -215,6 +216,20 @@ class VentyVeazyDevice(SBDevice):
             ),
         )
         self._state.vibration = on
+        self._fire_callbacks()
+
+    async def async_set_fahrenheit(self, *, on: bool) -> None:
+        """Toggle the Fahrenheit-display settings bit (best-effort)."""
+        bit = c.VENTY_SETTING_UNIT_FAHRENHEIT if on else 0
+        await self._write(
+            c.VENTY_UUID_CONTROL,
+            _build_frame(
+                c.VENTY_CMD_STATUS,
+                c.VENTY_WRITE_SETTINGS,
+                {c.VENTY_STATUS_SETTINGS: bit, 15: c.VENTY_SETTING_UNIT_FAHRENHEIT},
+            ),
+        )
+        self._state.fahrenheit = on
         self._fire_callbacks()
 
 

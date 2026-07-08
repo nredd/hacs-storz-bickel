@@ -39,6 +39,7 @@ class VolcanoDevice(SBDevice):
         auto_shutoff_toggle=True,
         led_brightness=True,
         hours_of_operation=True,
+        temperature_unit_display=True,
     )
     temp_min = c.VOLCANO_TEMP_MIN
     temp_max = c.VOLCANO_TEMP_MAX
@@ -188,4 +189,20 @@ class VolcanoDevice(SBDevice):
             c.VOLCANO_UUID_AUTO_OFF_SETTING, seconds.to_bytes(2, byteorder="little")
         )
         self._state.auto_shutoff_minutes = minutes
+        self._fire_callbacks()
+
+    async def async_set_fahrenheit(self, *, on: bool) -> None:
+        """Toggle the Fahrenheit-display bit in the control register (read-modify-write)."""
+        control = await self._read_uint32_control()
+        if control is None:
+            return
+        control = (
+            control | c.VOLCANO_MASK_FAHRENHEIT
+            if on
+            else control & ~c.VOLCANO_MASK_FAHRENHEIT
+        )
+        await self._write(
+            c.VOLCANO_UUID_CONTROL_REGISTER, control.to_bytes(4, byteorder="little")
+        )
+        self._state.fahrenheit = on
         self._fire_callbacks()

@@ -272,6 +272,10 @@ class SBDevice(ABC):
         """Set the boost target temperature (portable devices)."""
         raise self._unsupported("boost_temperature")
 
+    async def async_set_fahrenheit(self, *, on: bool) -> None:
+        """Set the device's own on-screen temperature unit (Volcano, Venty/Veazy)."""
+        raise self._unsupported("temperature_unit_display")
+
     def _unsupported(self, feature: str) -> StorzBickelConnectionError:
         """Return an error describing an unsupported feature for this device."""
         return StorzBickelConnectionError(

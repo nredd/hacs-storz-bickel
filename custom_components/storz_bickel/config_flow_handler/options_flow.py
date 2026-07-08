@@ -11,12 +11,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.config_entries import OptionsFlow
-from homeassistant.const import UnitOfTime
+from homeassistant.const import UnitOfTemperature, UnitOfTime
 from homeassistant.helpers.selector import (
     BooleanSelector,
     NumberSelector,
     NumberSelectorConfig,
     NumberSelectorMode,
+    SelectSelector,
+    SelectSelectorConfig,
 )
 import voluptuous as vol
 
@@ -27,10 +29,12 @@ from custom_components.storz_bickel.const import (
     CONF_PUMP_COOLDOWN_SECONDS,
     CONF_PUMP_FAILSAFE_ENABLED,
     CONF_PUMP_FAILSAFE_SECONDS,
+    CONF_TEMPERATURE_UNIT,
     DEFAULT_PUMP_COOLDOWN_ENABLED,
     DEFAULT_PUMP_COOLDOWN_SECONDS,
     DEFAULT_PUMP_FAILSAFE_ENABLED,
     DEFAULT_PUMP_FAILSAFE_SECONDS,
+    DEFAULT_TEMPERATURE_UNIT,
 )
 
 if TYPE_CHECKING:
@@ -64,41 +68,50 @@ class StorzBickelOptionsFlowHandler(OptionsFlow):
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Show and process the pump protection options."""
+        """Show and process the device options (temperature unit, pump protections)."""
         device_type = DeviceType(self.config_entry.data[CONF_DEVICE_TYPE])
-        if not capabilities_for(device_type).pump:
-            return self.async_abort(reason="no_options_available")
 
         if user_input is not None:
             return self.async_create_entry(data=user_input)
 
         options = self.config_entry.options
-        schema = vol.Schema(
-            {
-                vol.Required(
-                    CONF_PUMP_FAILSAFE_ENABLED,
-                    default=options.get(
-                        CONF_PUMP_FAILSAFE_ENABLED, DEFAULT_PUMP_FAILSAFE_ENABLED
-                    ),
-                ): BooleanSelector(),
-                vol.Required(
-                    CONF_PUMP_FAILSAFE_SECONDS,
-                    default=options.get(
-                        CONF_PUMP_FAILSAFE_SECONDS, DEFAULT_PUMP_FAILSAFE_SECONDS
-                    ),
-                ): _duration_selector(MAX_PUMP_FAILSAFE_SECONDS),
-                vol.Required(
-                    CONF_PUMP_COOLDOWN_ENABLED,
-                    default=options.get(
-                        CONF_PUMP_COOLDOWN_ENABLED, DEFAULT_PUMP_COOLDOWN_ENABLED
-                    ),
-                ): BooleanSelector(),
-                vol.Required(
-                    CONF_PUMP_COOLDOWN_SECONDS,
-                    default=options.get(
-                        CONF_PUMP_COOLDOWN_SECONDS, DEFAULT_PUMP_COOLDOWN_SECONDS
-                    ),
-                ): _duration_selector(MAX_PUMP_COOLDOWN_SECONDS),
-            }
-        )
-        return self.async_show_form(step_id="init", data_schema=schema)
+        schema_dict: dict[vol.Marker, Any] = {
+            vol.Required(
+                CONF_TEMPERATURE_UNIT,
+                default=options.get(CONF_TEMPERATURE_UNIT, DEFAULT_TEMPERATURE_UNIT),
+            ): SelectSelector(
+                SelectSelectorConfig(
+                    options=[UnitOfTemperature.CELSIUS, UnitOfTemperature.FAHRENHEIT]
+                )
+            ),
+        }
+        if capabilities_for(device_type).pump:
+            schema_dict.update(
+                {
+                    vol.Required(
+                        CONF_PUMP_FAILSAFE_ENABLED,
+                        default=options.get(
+                            CONF_PUMP_FAILSAFE_ENABLED, DEFAULT_PUMP_FAILSAFE_ENABLED
+                        ),
+                    ): BooleanSelector(),
+                    vol.Required(
+                        CONF_PUMP_FAILSAFE_SECONDS,
+                        default=options.get(
+                            CONF_PUMP_FAILSAFE_SECONDS, DEFAULT_PUMP_FAILSAFE_SECONDS
+                        ),
+                    ): _duration_selector(MAX_PUMP_FAILSAFE_SECONDS),
+                    vol.Required(
+                        CONF_PUMP_COOLDOWN_ENABLED,
+                        default=options.get(
+                            CONF_PUMP_COOLDOWN_ENABLED, DEFAULT_PUMP_COOLDOWN_ENABLED
+                        ),
+                    ): BooleanSelector(),
+                    vol.Required(
+                        CONF_PUMP_COOLDOWN_SECONDS,
+                        default=options.get(
+                            CONF_PUMP_COOLDOWN_SECONDS, DEFAULT_PUMP_COOLDOWN_SECONDS
+                        ),
+                    ): _duration_selector(MAX_PUMP_COOLDOWN_SECONDS),
+                }
+            )
+        return self.async_show_form(step_id="init", data_schema=vol.Schema(schema_dict))
