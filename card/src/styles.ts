@@ -1,4 +1,4 @@
-/** Styles for the main card element (the dial styles its own shadow root). */
+/** Styles for the main card element (subcomponents style their own shadow roots). */
 
 import { css } from "lit";
 
@@ -13,66 +13,98 @@ export const cardStyles = css`
   }
 
   .body {
+    container-type: inline-size;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
     transition: opacity 0.3s ease;
   }
 
-  .body.disconnected .controls {
+  .body.disconnected .grid {
     opacity: 0.45;
     pointer-events: none;
-  }
-
-  .controls {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
   }
 
   /* ---- header ---------------------------------------------------------- */
 
   .header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    justify-content: space-between;
     gap: 10px;
   }
 
+  .titles {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .kicker {
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--secondary-text-color);
+  }
+
   .name {
-    flex: 1;
-    font-size: 1.1rem;
-    font-weight: 500;
+    font-size: 1.3rem;
+    font-weight: 600;
     color: var(--primary-text-color);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     flex: none;
   }
 
-  .dot.connected {
-    background: var(--sb-ready);
-    box-shadow: 0 0 5px var(--sb-ready);
+  .connection-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--secondary-background-color, rgba(127, 127, 127, 0.12));
+    color: var(--secondary-text-color);
   }
 
-  .dot.disconnected {
-    background: var(--error-color, #f44336);
+  .connection-chip::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .connection-chip.on {
+    color: var(--sb-ready);
+    background: color-mix(in srgb, var(--sb-ready) 16%, transparent);
+  }
+
+  .connection-chip.off {
+    color: var(--error-color, #f44336);
+    background: color-mix(in srgb, var(--error-color, #f44336) 16%, transparent);
     animation: sb-blink 1.6s ease-in-out infinite;
   }
 
   @keyframes sb-blink {
     50% {
-      opacity: 0.35;
+      opacity: 0.5;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .dot.disconnected {
+    .connection-chip.off {
       animation: none;
     }
   }
@@ -89,37 +121,114 @@ export const cardStyles = css`
     font-variant-numeric: tabular-nums;
   }
 
-  /* ---- heat pill ------------------------------------------------------- */
+  /* ---- layout ------------------------------------------------------------ */
 
-  .heat {
-    align-self: center;
-    min-width: 60%;
-    padding: 12px 24px;
-    border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-    border-radius: 28px;
-    background: transparent;
-    color: var(--primary-text-color);
-    font-size: 0.95rem;
-    font-weight: 600;
-    letter-spacing: 0.2em;
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  @container (max-width: 640px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .left-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    background: var(--secondary-background-color, rgba(127, 127, 127, 0.06));
+    border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.15));
+    border-radius: 10px;
+    padding: 24px;
+  }
+
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .panel {
+    background: var(--secondary-background-color, rgba(127, 127, 127, 0.06));
+    border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.15));
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+
+  .panel-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
+    color: var(--secondary-text-color);
+    margin-bottom: 10px;
+  }
+
+  /* ---- readout + status label -------------------------------------------- */
+
+  .status-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--secondary-text-color);
+  }
+
+  /* ---- stepper ------------------------------------------------------------ */
+
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--card-background-color, rgba(0, 0, 0, 0.2));
+    border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.15));
+    border-radius: 100px;
+    padding: 6px;
+  }
+
+  .step {
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.15));
+    border-radius: 50%;
+    background: var(--secondary-background-color, rgba(127, 127, 127, 0.12));
+    color: var(--primary-text-color);
+    font-size: 1.2rem;
+    line-height: 1;
     cursor: pointer;
-    transition:
-      background 0.25s ease,
-      color 0.25s ease,
-      box-shadow 0.25s ease,
-      transform 0.1s ease;
+    transition: transform 0.1s ease;
   }
 
-  .heat:active {
-    transform: scale(0.97);
+  .step:active {
+    transform: scale(0.92);
   }
 
-  .heat.on {
-    border-color: transparent;
-    background: var(--sb-heat);
-    color: #fff;
-    box-shadow: 0 0 14px color-mix(in srgb, var(--sb-heat) 60%, transparent);
+  .step:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  .stepper-value {
+    min-width: 96px;
+    text-align: center;
+  }
+
+  .stepper-value span {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-text-color);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .step-caption {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--secondary-text-color);
   }
 
   /* ---- preset chips ---------------------------------------------------- */
@@ -140,24 +249,11 @@ export const cardStyles = css`
     font-size: 0.9rem;
     font-variant-numeric: tabular-nums;
     cursor: pointer;
-    animation: sb-fade-in 0.3s ease backwards;
     transition:
       background 0.2s ease,
       color 0.2s ease,
       border-color 0.2s ease,
       transform 0.1s ease;
-  }
-
-  .preset:nth-child(2) {
-    animation-delay: 0.05s;
-  }
-
-  .preset:nth-child(3) {
-    animation-delay: 0.1s;
-  }
-
-  .preset:nth-child(4) {
-    animation-delay: 0.15s;
   }
 
   .preset:active {
@@ -170,89 +266,111 @@ export const cardStyles = css`
     color: #fff;
   }
 
-  @keyframes sb-fade-in {
-    from {
-      opacity: 0;
-      transform: translateY(4px);
-    }
-  }
+  /* ---- HEAT / AIR toggle row --------------------------------------------- */
 
-  @media (prefers-reduced-motion: reduce) {
-    .preset {
-      animation: none;
-    }
-  }
-
-  /* ---- pump bar -------------------------------------------------------- */
-
-  .pump {
-    position: relative;
-    overflow: hidden;
+  .toggle-row {
+    display: flex;
+    gap: 12px;
     width: 100%;
-    padding: 13px;
+  }
+
+  .heat-btn,
+  .air-btn {
+    flex: 1;
+    padding: 12px 16px;
     border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-    border-radius: 14px;
+    border-radius: 100px;
     background: transparent;
     color: var(--primary-text-color);
-    font-size: 0.95rem;
-    font-weight: 600;
-    letter-spacing: 0.2em;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
     cursor: pointer;
     transition:
       background 0.25s ease,
       color 0.25s ease,
+      box-shadow 0.25s ease,
       transform 0.1s ease;
   }
 
-  .pump:active {
-    transform: scale(0.98);
+  .heat-btn:active,
+  .air-btn:active {
+    transform: scale(0.97);
   }
 
-  .pump.on {
+  .heat-btn.on {
+    border-color: transparent;
+    background: var(--sb-heat);
+    color: #1a1207;
+    box-shadow: 0 0 14px color-mix(in srgb, var(--sb-heat) 60%, transparent);
+  }
+
+  .air-btn.on {
     border-color: transparent;
     background: var(--primary-color, #03a9f4);
     color: #fff;
   }
 
-  .pump.on::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      105deg,
-      transparent 20%,
-      rgba(255, 255, 255, 0.25) 50%,
-      transparent 80%
-    );
-    transform: translateX(-100%);
-    animation: sb-airflow 1.8s linear infinite;
-  }
+  /* ---- session panel ----------------------------------------------------- */
 
-  @keyframes sb-airflow {
-    to {
-      transform: translateX(100%);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .pump.on::after {
-      animation: none;
-    }
-  }
-
-  /* ---- status + settings ----------------------------------------------- */
-
-  .status {
+  .session-panel {
     display: flex;
-    justify-content: center;
-    gap: 6px;
-    font-size: 0.85rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .session-timer {
+    font-size: 1.8rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary-text-color);
+  }
+
+  .sessions-today {
+    text-align: center;
+  }
+
+  .sessions-today-count {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-text-color);
+  }
+
+  .sessions-today-label {
+    font-size: 0.7rem;
     color: var(--secondary-text-color);
   }
 
-  details {
-    border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+  /* ---- device info + settings --------------------------------------------- */
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 0.9rem;
+    color: var(--primary-text-color);
+    border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.1));
+  }
+
+  .info-row:first-of-type {
+    border-top: none;
+  }
+
+  .info-row select {
+    background: var(--card-background-color, rgba(0, 0, 0, 0.2));
+    color: var(--primary-text-color);
+    border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  details.settings {
+    border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.15));
     padding-top: 4px;
   }
 

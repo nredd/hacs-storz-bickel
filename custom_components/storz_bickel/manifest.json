@@ -20,5 +20,5 @@
   "issue_tracker": "https://github.com/nredd/hacs-storz-bickel/issues",
   "quality_scale": "silver",
   "requirements": ["bleak-retry-connector>=3.6.0"],
-  "version": "0.1.0"
+  "version": "1.0.0"
 }

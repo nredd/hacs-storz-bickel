@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING
 from unittest.mock import patch
 
-from homeassistant.config_entries import SOURCE_BLUETOOTH, SOURCE_USER
+from homeassistant.config_entries import SOURCE_BLUETOOTH, SOURCE_RECONFIGURE, SOURCE_USER
 from homeassistant.const import CONF_ADDRESS
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -106,3 +106,85 @@ async def test_user_flow_selects_device(
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"] == {CONF_ADDRESS: CRAFTY_ADDRESS, CONF_DEVICE_TYPE: "crafty"}
+
+
+async def test_reconfigure_same_address_does_not_require_deletion(
+    hass: HomeAssistant, enable_bluetooth: None
+) -> None:
+    """The entry's own address must not be excluded from reconfigure discovery."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=VOLCANO_ADDRESS,
+        data={CONF_ADDRESS: VOLCANO_ADDRESS, CONF_DEVICE_TYPE: "volcano"},
+    )
+    entry.add_to_hass(hass)
+
+    discovered = [_info(VOLCANO_ADDRESS, "S&B VOLCANO H")]
+    with patch(_DISCOVERED, return_value=discovered):
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN,
+            context={"source": SOURCE_RECONFIGURE, "entry_id": entry.entry_id},
+        )
+        assert result["type"] is FlowResultType.FORM
+        assert result["step_id"] == "reconfigure"
+
+        with patch(_SETUP_ENTRY, return_value=True):
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"],
+                {CONF_ADDRESS: VOLCANO_ADDRESS},
+            )
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    assert entry.data == {CONF_ADDRESS: VOLCANO_ADDRESS, CONF_DEVICE_TYPE: "volcano"}
+
+
+async def test_reconfigure_to_a_different_device(
+    hass: HomeAssistant, enable_bluetooth: None
+) -> None:
+    """Reconfigure can repoint an entry at a different nearby device."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=VOLCANO_ADDRESS,
+        data={CONF_ADDRESS: VOLCANO_ADDRESS, CONF_DEVICE_TYPE: "volcano"},
+    )
+    entry.add_to_hass(hass)
+
+    discovered = [_info(CRAFTY_ADDRESS, None, [c.CRAFTY_SERVICE_DATA])]
+    with patch(_DISCOVERED, return_value=discovered):
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN,
+            context={"source": SOURCE_RECONFIGURE, "entry_id": entry.entry_id},
+        )
+        assert result["type"] is FlowResultType.FORM
+        assert result["step_id"] == "reconfigure"
+
+        with patch(_SETUP_ENTRY, return_value=True):
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"],
+                {CONF_ADDRESS: CRAFTY_ADDRESS},
+            )
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    assert entry.unique_id == CRAFTY_ADDRESS
+    assert entry.data == {CONF_ADDRESS: CRAFTY_ADDRESS, CONF_DEVICE_TYPE: "crafty"}
+
+
+async def test_reconfigure_no_devices_found(
+    hass: HomeAssistant, enable_bluetooth: None
+) -> None:
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=VOLCANO_ADDRESS,
+        data={CONF_ADDRESS: VOLCANO_ADDRESS, CONF_DEVICE_TYPE: "volcano"},
+    )
+    entry.add_to_hass(hass)
+
+    with patch(_DISCOVERED, return_value=[]):
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN,
+            context={"source": SOURCE_RECONFIGURE, "entry_id": entry.entry_id},
+        )
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "no_devices_found"

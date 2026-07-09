@@ -27,6 +27,13 @@ export interface DeviceRegistryEntry {
   id: string;
   name?: string;
   name_by_user?: string;
+  sw_version?: string;
+}
+
+/** One state-change record as returned by the `history/period` REST API. */
+export interface HistoryStateRecord {
+  state: string;
+  last_changed: string;
 }
 
 /** The slice of the `hass` object the card depends on. */
@@ -36,6 +43,7 @@ export interface HomeAssistant {
   devices: Record<string, DeviceRegistryEntry>;
   config: { unit_system: { temperature: string } };
   callService(domain: string, service: string, data?: Record<string, unknown>): Promise<unknown>;
+  callApi<T>(method: "GET" | "POST", path: string): Promise<T>;
 }
 
 /** YAML/UI configuration accepted by `custom:storz-bickel-card`. */

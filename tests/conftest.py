@@ -73,6 +73,7 @@ class FakeDevice:
         self.heater_calls: list[bool] = []
         self.target_temperature_calls: list[float] = []
         self.fahrenheit_calls: list[bool] = []
+        self.led_brightness_calls: list[int] = []
         self._callbacks: list[Callable[[SBDeviceState], None]] = []
         self._state = SBDeviceState(
             current_temperature=40.0,
@@ -144,6 +145,12 @@ class FakeDevice:
         """Record the Fahrenheit-display command and mirror the optimistic write."""
         self.fahrenheit_calls.append(on)
         self._state.fahrenheit = on
+        self.fire()
+
+    async def async_set_led_brightness(self, percent: int) -> None:
+        """Record the LED brightness command and mirror the optimistic write."""
+        self.led_brightness_calls.append(percent)
+        self._state.led_brightness = percent
         self.fire()
 
 

@@ -17,7 +17,9 @@ from homeassistant.util.unit_conversion import (
 )
 
 from custom_components.storz_bickel.const import (
+    CONF_TEMP_STEP,
     CONF_TEMPERATURE_UNIT,
+    DEFAULT_TEMP_STEP,
     DEFAULT_TEMPERATURE_UNIT,
     PARALLEL_UPDATES as _PARALLEL_UPDATES,
 )
@@ -67,8 +69,11 @@ class StorzBickelClimate(StorzBickelEntity, ClimateEntity):
         )
         self._attr_min_temp = self._to_display(device.temp_min)
         self._attr_max_temp = self._to_display(device.temp_max)
+        temp_step = coordinator.config_entry.options.get(
+            CONF_TEMP_STEP, DEFAULT_TEMP_STEP
+        )
         self._attr_target_temperature_step = TemperatureDeltaConverter.convert(
-            device.temp_step, UnitOfTemperature.CELSIUS, self._attr_temperature_unit
+            temp_step, UnitOfTemperature.CELSIUS, self._attr_temperature_unit
         )
 
     def _to_display(self, celsius: float) -> float:
