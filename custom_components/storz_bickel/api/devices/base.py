@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 import asyncio
 from typing import TYPE_CHECKING
 
-from bleak.exc import BleakError
+from bleak.exc import BleakCharacteristicNotFoundError, BleakError
 from bleak_retry_connector import BleakClientWithServiceCache, establish_connection
 
 from custom_components.storz_bickel.api.exceptions import (
@@ -114,6 +114,12 @@ class SBDevice(ABC):
     async def async_connect(self) -> None:
         """Establish the BLE connection, read identity, and subscribe to updates.
 
+        A cached GATT service table (reused across reconnects for speed) can be
+        incomplete if it was captured from an earlier interrupted discovery, which
+        surfaces as a missing characteristic even though the device supports it.
+        On that specific failure we clear the cache and retry once with a forced
+        fresh discovery before giving up.
+
         Raises:
             StorzBickelConnectionError: If the connection cannot be established.
         """
@@ -121,20 +127,39 @@ class SBDevice(ABC):
             if self.connected:
                 return
             LOGGER.debug("Connecting to %s (%s)", self.name, self.address)
-            try:
-                self._client = await establish_connection(
-                    BleakClientWithServiceCache,
-                    self._ble_device,
-                    self.name,
-                    disconnected_callback=self._handle_disconnect,
-                )
-                await self._read_static_info()
-                await self._subscribe()
-                await self.async_poll()
-            except (BleakError, TimeoutError) as err:
-                await self._safe_disconnect()
-                msg = f"Could not connect to {self.name}: {err}"
-                raise StorzBickelConnectionError(msg) from err
+            for attempt in range(2):
+                use_services_cache = attempt == 0
+                try:
+                    self._client = await establish_connection(
+                        BleakClientWithServiceCache,
+                        self._ble_device,
+                        self.name,
+                        disconnected_callback=self._handle_disconnect,
+                        use_services_cache=use_services_cache,
+                    )
+                    await self._read_static_info()
+                    await self._subscribe()
+                    await self.async_poll()
+                except BleakCharacteristicNotFoundError as err:
+                    client = self._client
+                    await self._safe_disconnect()
+                    if attempt == 1:
+                        msg = f"Could not connect to {self.name}: {err}"
+                        raise StorzBickelConnectionError(msg) from err
+                    LOGGER.warning(
+                        "Stale GATT cache for %s (%s); clearing cache and retrying "
+                        "with fresh discovery",
+                        self.name,
+                        err,
+                    )
+                    if client is not None:
+                        await client.clear_cache()
+                    continue
+                except (BleakError, TimeoutError) as err:
+                    await self._safe_disconnect()
+                    msg = f"Could not connect to {self.name}: {err}"
+                    raise StorzBickelConnectionError(msg) from err
+                break
             LOGGER.debug("Connected to %s", self.name)
             self._fire_callbacks()
 
