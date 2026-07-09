@@ -64,14 +64,40 @@ Bun is available (and skips it otherwise, so Python-only environments still pass
   ids are derived in `card/src/entities.ts` from `hass.entities` by matching
   `platform === "storz_bickel"` and each entry's `translation_key` (the integration sets it equal
   to the entity description key). This survives entity renames and doubles as capability
-  detection: no `pump` entity → no pump bar (Venty/Crafty), no `battery` sensor → no battery chip
-  (Volcano).
-- **Single source of truth for heat.** The heat pill drives the `climate` entity
+  detection: no `pump` entity → no AIR toggle (Venty/Crafty), no `battery` sensor → no battery
+  chip (Volcano).
+- **Single source of truth for heat.** The HEAT toggle drives the `climate` entity
   (`set_hvac_mode`), never the parallel heater switch.
-- **Optimistic steppers.** The dial's −/+ taps update a pending target immediately and debounce
-  ~500 ms before calling `climate.set_temperature`.
+- **Optimistic steppers and dial drags.** The ± stepper and dragging the dial update a pending
+  target immediately and debounce ~500 ms before calling `climate.set_temperature`.
 - **Pump safety stays server-side.** The card just toggles the pump switch; failsafe/cooldown
-  enforcement lives in the integration's pump guard.
+  enforcement lives in the integration's pump guard. The pump failsafe/cooldown *duration*
+  dropdowns in the device-info panel write to the config entry's options (`number.set_value` on an
+  option-backed number entity), which reloads the entry — the same mechanism the options flow
+  itself uses. This is a real, if infrequent, UX cost (a BLE reconnect per change) that's
+  documented at the entity level (`custom_components/storz_bickel/number/__init__.py`).
 - **No HA frontend imports.** The card hand-rolls the minimal `hass` typings it needs
-  (`card/src/types.ts`) and uses native elements (`<details>`, `<input type="range">`) styled with
-  HA theme variables, so it has zero runtime dependencies beyond Lit and works in happy-dom tests.
+  (`card/src/types.ts`) and uses native elements (`<details>`, `<input type="range">`, `<select>`)
+  styled with HA theme variables, so it has zero runtime dependencies beyond Lit and works in
+  happy-dom tests.
+- **Self-registering subcomponents.** Each subcomponent module (`dial.ts`, `seven-segment.ts`,
+  `history-chart.ts`, `sessions-chart.ts`) calls `customElements.define` for its own tag at the
+  bottom of the file (guarded by `customElements.get`), so importing a subcomponent directly (as
+  the tests do) is enough to register it — no central registry.
+- **Dashboard layout is a literal port, not a redesign.** The two-column layout (readout, dial,
+  stepper, HEAT/AIR on the left; session/history/sessions/device-info panels on the right) and the
+  dial's rotating-knob mechanism were ported pixel-for-pixel from a design mockup rather than
+  reinterpreted — see the geometry comments at the top of `card/src/dial.ts`. It reflows to a
+  single column under a `@container` query for narrow dashboard slots.
+- **No external fonts or charting libraries.** The seven-segment readout and both charts
+  (`history-chart.ts`, `sessions-chart.ts`) are hand-built with CSS and SVG, matching the existing
+  dial's approach, so the card stays a single self-contained bundle with no CDN font/script
+  dependency (important for HA installs without outbound internet access).
+- **Temperature history has no dedicated backend entity.** `history-chart.ts` queries HA's
+  `history/period` REST API directly against the `temperature` sensor (already
+  `state_class: measurement`, so it's recorder/LTS-eligible out of the box) instead of requiring a
+  new integration-side sensor.
+- **Sessions-per-day comes from `session_history`'s `daily_counts` attribute** (added alongside
+  the existing 48h `sessions` attribute — see `custom_components/storz_bickel/session/entities.py`),
+  bucketed from the tracker's full in-memory lifetime session list, not just the short live-view
+  window.

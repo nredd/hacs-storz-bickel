@@ -34,6 +34,7 @@ from custom_components.storz_bickel.const import (
     LOGGER,
 )
 from custom_components.storz_bickel.coordinator.pump_guard import StorzBickelPumpGuard
+from custom_components.storz_bickel.session import SessionStore, SessionTracker
 from custom_components.storz_bickel.workflow import StorzBickelWorkflowRunner
 
 if TYPE_CHECKING:
@@ -74,6 +75,12 @@ class StorzBickelDataUpdateCoordinator(DataUpdateCoordinator[SBDeviceState]):
         options = config_entry.options
         self.pump_guard: StorzBickelPumpGuard | None = None
         self.workflow_runner: StorzBickelWorkflowRunner | None = None
+        self.session_tracker = SessionTracker(
+            hass,
+            device,
+            SessionStore(hass, device.address),
+            on_finalized=self.async_update_listeners,
+        )
         if device.capabilities.pump:
             self.pump_guard = StorzBickelPumpGuard(
                 hass,
@@ -98,6 +105,7 @@ class StorzBickelDataUpdateCoordinator(DataUpdateCoordinator[SBDeviceState]):
         """Push a notification-driven state update to all entities."""
         if self.pump_guard is not None:
             self.pump_guard.handle_state(state)
+        self.session_tracker.handle_state(state)
         self.async_set_updated_data(state)
 
     async def _async_setup(self) -> None:
@@ -106,6 +114,7 @@ class StorzBickelDataUpdateCoordinator(DataUpdateCoordinator[SBDeviceState]):
             await self._ensure_connected()
         except StorzBickelError as err:
             raise ConfigEntryNotReady(str(err)) from err
+        await self.session_tracker.async_load()
 
     async def _async_update_data(self) -> SBDeviceState:
         """Ensure the connection is alive and poll the current temperature."""
@@ -118,6 +127,7 @@ class StorzBickelDataUpdateCoordinator(DataUpdateCoordinator[SBDeviceState]):
         # edge detection makes duplicate observations harmless.
         if self.pump_guard is not None:
             self.pump_guard.handle_state(state)
+        self.session_tracker.handle_state(state)
         return state
 
     async def _ensure_connected(self) -> None:
@@ -141,6 +151,7 @@ class StorzBickelDataUpdateCoordinator(DataUpdateCoordinator[SBDeviceState]):
             self.pump_guard.async_shutdown()
         if self.workflow_runner is not None:
             self.workflow_runner.async_shutdown()
+        await self.session_tracker.async_shutdown()
         await super().async_shutdown()
         self._unregister_callback()
         await self.device.async_disconnect()

@@ -15,6 +15,7 @@ import type { HomeAssistant } from "./types";
 /** Entity ids resolved for one device; absent keys mean absent capabilities. */
 export interface DeviceEntityIds {
   climate?: string;
+  temperature?: string;
   pump?: string;
   vibration?: string;
   autoShutoffEnabled?: string;
@@ -23,6 +24,15 @@ export interface DeviceEntityIds {
   ledBrightness?: string;
   autoShutoffMinutes?: string;
   boostTemperature?: string;
+  currentSessionStart?: string;
+  sessionHistory?: string;
+  totalSessions?: string;
+  favoriteTemperature?: string;
+  totalRuntime?: string;
+  bleFirmwareVersion?: string;
+  pumpFailsafeSeconds?: string;
+  pumpCooldownSeconds?: string;
+  tempStep?: string;
 }
 
 /** Resolve the integration's entity ids for `deviceId` from the registry. */
@@ -37,6 +47,7 @@ export function deviceEntities(hass: HomeAssistant, deviceId: string): DeviceEnt
 
   return {
     climate: find("climate", "heater"),
+    temperature: find("sensor", "temperature"),
     pump: find("switch", "pump"),
     vibration: find("switch", "vibration"),
     autoShutoffEnabled: find("switch", "auto_shutoff_enabled"),
@@ -45,5 +56,14 @@ export function deviceEntities(hass: HomeAssistant, deviceId: string): DeviceEnt
     ledBrightness: find("number", "led_brightness"),
     autoShutoffMinutes: find("number", "auto_shutoff_minutes"),
     boostTemperature: find("number", "boost_temperature"),
+    currentSessionStart: find("sensor", "current_session_start"),
+    sessionHistory: find("sensor", "session_history"),
+    totalSessions: find("sensor", "total_sessions"),
+    favoriteTemperature: find("sensor", "favorite_temperature"),
+    totalRuntime: find("sensor", "total_runtime"),
+    bleFirmwareVersion: find("sensor", "ble_firmware_version"),
+    pumpFailsafeSeconds: find("number", "pump_failsafe_seconds"),
+    pumpCooldownSeconds: find("number", "pump_cooldown_seconds"),
+    tempStep: find("number", "temp_step"),
   };
 }

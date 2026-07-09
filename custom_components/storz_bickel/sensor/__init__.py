@@ -15,6 +15,7 @@ from homeassistant.const import PERCENTAGE, EntityCategory, UnitOfTemperature, U
 
 from custom_components.storz_bickel.const import PARALLEL_UPDATES as _PARALLEL_UPDATES
 from custom_components.storz_bickel.entity import StorzBickelEntity
+from custom_components.storz_bickel.session.entities import async_add_session_entities
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -143,6 +144,7 @@ async def async_setup_entry(
         for description in SENSORS
         if description.capability is None or getattr(capabilities, description.capability)
     )
+    await async_add_session_entities(entry, async_add_entities)
 
 
 class StorzBickelSensor(StorzBickelEntity, SensorEntity):

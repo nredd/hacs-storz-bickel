@@ -8,7 +8,19 @@ from typing import TYPE_CHECKING, Any
 from homeassistant.components.number import NumberEntity, NumberEntityDescription
 from homeassistant.const import PERCENTAGE, EntityCategory, UnitOfTemperature, UnitOfTime
 
-from custom_components.storz_bickel.const import PARALLEL_UPDATES as _PARALLEL_UPDATES
+from custom_components.storz_bickel.config_flow_handler.options_flow import (
+    MAX_PUMP_COOLDOWN_SECONDS,
+    MAX_PUMP_FAILSAFE_SECONDS,
+)
+from custom_components.storz_bickel.const import (
+    CONF_PUMP_COOLDOWN_SECONDS,
+    CONF_PUMP_FAILSAFE_SECONDS,
+    CONF_TEMP_STEP,
+    DEFAULT_PUMP_COOLDOWN_SECONDS,
+    DEFAULT_PUMP_FAILSAFE_SECONDS,
+    DEFAULT_TEMP_STEP,
+    PARALLEL_UPDATES as _PARALLEL_UPDATES,
+)
 from custom_components.storz_bickel.entity import StorzBickelEntity
 
 if TYPE_CHECKING:
@@ -18,6 +30,9 @@ if TYPE_CHECKING:
     from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
     from custom_components.storz_bickel.api import SBDevice, SBDeviceState
+    from custom_components.storz_bickel.coordinator import (
+        StorzBickelDataUpdateCoordinator,
+    )
     from custom_components.storz_bickel.data import StorzBickelConfigEntry
 
 PARALLEL_UPDATES = _PARALLEL_UPDATES
@@ -75,6 +90,66 @@ NUMBERS: tuple[StorzBickelNumberEntityDescription, ...] = (
 )
 
 
+@dataclass(frozen=True, kw_only=True)
+class StorzBickelOptionNumberEntityDescription(NumberEntityDescription):
+    """Describes a number entity backed by a config entry option.
+
+    Unlike :class:`StorzBickelNumberEntityDescription`, this never talks to the
+    device: the value configures integration-side behavior (pump protections,
+    the climate entity's temperature step) read once at coordinator
+    construction (see ``coordinator/base.py``). Writing a new value updates
+    ``config_entry.options``, which triggers the entry's existing update
+    listener to reload the entry (the same path the options flow itself
+    uses), rather than issuing a BLE write.
+    """
+
+    conf_key: str
+    default: float
+    capability: str | None = None
+
+
+OPTION_NUMBERS: tuple[StorzBickelOptionNumberEntityDescription, ...] = (
+    StorzBickelOptionNumberEntityDescription(
+        key="pump_failsafe_seconds",
+        translation_key="pump_failsafe_seconds",
+        capability="pump",
+        entity_category=EntityCategory.CONFIG,
+        native_min_value=1,
+        native_max_value=MAX_PUMP_FAILSAFE_SECONDS,
+        native_step=1,
+        native_unit_of_measurement=UnitOfTime.SECONDS,
+        icon="mdi:timer-alert-outline",
+        conf_key=CONF_PUMP_FAILSAFE_SECONDS,
+        default=DEFAULT_PUMP_FAILSAFE_SECONDS,
+    ),
+    StorzBickelOptionNumberEntityDescription(
+        key="pump_cooldown_seconds",
+        translation_key="pump_cooldown_seconds",
+        capability="pump",
+        entity_category=EntityCategory.CONFIG,
+        native_min_value=1,
+        native_max_value=MAX_PUMP_COOLDOWN_SECONDS,
+        native_step=1,
+        native_unit_of_measurement=UnitOfTime.SECONDS,
+        icon="mdi:timer-sand",
+        conf_key=CONF_PUMP_COOLDOWN_SECONDS,
+        default=DEFAULT_PUMP_COOLDOWN_SECONDS,
+    ),
+    StorzBickelOptionNumberEntityDescription(
+        key="temp_step",
+        translation_key="temp_step",
+        entity_category=EntityCategory.CONFIG,
+        native_min_value=0.5,
+        native_max_value=5,
+        native_step=0.5,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        icon="mdi:thermometer-lines",
+        conf_key=CONF_TEMP_STEP,
+        default=DEFAULT_TEMP_STEP,
+    ),
+)
+
+
 async def async_setup_entry(
     _hass: HomeAssistant,
     entry: StorzBickelConfigEntry,
@@ -84,9 +159,17 @@ async def async_setup_entry(
     coordinator = entry.runtime_data.coordinator
     capabilities = coordinator.device.capabilities
     async_add_entities(
-        StorzBickelNumber(coordinator, description)
-        for description in NUMBERS
-        if getattr(capabilities, description.capability)
+        [
+            StorzBickelNumber(coordinator, description)
+            for description in NUMBERS
+            if getattr(capabilities, description.capability)
+        ]
+        + [
+            StorzBickelOptionNumber(coordinator, description)
+            for description in OPTION_NUMBERS
+            if description.capability is None
+            or getattr(capabilities, description.capability)
+        ]
     )
 
 
@@ -103,3 +186,37 @@ class StorzBickelNumber(StorzBickelEntity, NumberEntity):
     async def async_set_native_value(self, value: float) -> None:
         """Write a new value to the device."""
         await self.entity_description.set_fn(self.device, value)
+
+
+class StorzBickelOptionNumber(StorzBickelEntity, NumberEntity):
+    """A capability-gated setting backed by a config entry option."""
+
+    entity_description: StorzBickelOptionNumberEntityDescription
+
+    def __init__(
+        self,
+        coordinator: StorzBickelDataUpdateCoordinator,
+        entity_description: StorzBickelOptionNumberEntityDescription,
+    ) -> None:
+        """Initialize with the coordinator's config entry."""
+        super().__init__(coordinator, entity_description)
+        self._entry = coordinator.config_entry
+
+    @property
+    def available(self) -> bool:
+        """Option-backed settings don't depend on a live BLE connection."""
+        return True
+
+    @property
+    def native_value(self) -> float:
+        """Return the current option value, falling back to the default."""
+        return self._entry.options.get(
+            self.entity_description.conf_key, self.entity_description.default
+        )
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Persist the new option value; the entry reloads to pick it up."""
+        self.hass.config_entries.async_update_entry(
+            self._entry,
+            options={**self._entry.options, self.entity_description.conf_key: value},
+        )
