@@ -120,6 +120,48 @@ class StorzBickelConfigFlowHandler(ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({vol.Required(CONF_ADDRESS): vol.In(options)}),
         )
 
+    async def async_step_reconfigure(
+        self, user_input: dict[str, str] | None = None
+    ) -> ConfigFlowResult:
+        """Point an existing entry at a different nearby device.
+
+        Unlike a fresh setup, this never requires deleting the entry first:
+        the reconfigure entry's own address is not excluded from the list of
+        nearby devices, so re-selecting the same device (e.g. to recover
+        after it dropped off HA's Bluetooth cache) works without a delete.
+        """
+        reconfigure_entry = self._get_reconfigure_entry()
+        if user_input is not None:
+            address = user_input[CONF_ADDRESS]
+            name, device_type = self._discovered[address]
+            return self.async_update_reload_and_abort(
+                reconfigure_entry,
+                title=name or device_type.model_name,
+                unique_id=address,
+                data={CONF_ADDRESS: address, CONF_DEVICE_TYPE: device_type.value},
+            )
+
+        configured = self._async_current_ids() - {reconfigure_entry.unique_id}
+        self._discovered = {}
+        for info in bluetooth.async_discovered_service_info(self.hass, connectable=True):
+            if info.address in configured:
+                continue
+            device_type = detect_device_type(info.name, info.service_uuids)
+            if device_type is not None:
+                self._discovered[info.address] = (info.name, device_type)
+
+        if not self._discovered:
+            return self.async_abort(reason="no_devices_found")
+
+        options = {
+            address: f"{name or device_type.model_name} ({address})"
+            for address, (name, device_type) in self._discovered.items()
+        }
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema({vol.Required(CONF_ADDRESS): vol.In(options)}),
+        )
+
     def _create_entry(
         self, address: str, name: str | None, device_type: DeviceType
     ) -> ConfigFlowResult:

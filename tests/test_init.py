@@ -34,6 +34,11 @@ async def test_setup_creates_entities(
     assert len(hass.states.async_all("binary_sensor")) == 3
     # Full-session, fill-balloon, and stop-workflow buttons.
     assert len(hass.states.async_all("button")) == 3
+    # Temperature + total_runtime (enabled by default) plus the 6 session
+    # sensors (last_session, current_session_start, total_sessions,
+    # total_pump_time, favorite_temperature, session_history); several other
+    # sensors exist but are disabled by default.
+    assert len(hass.states.async_all("sensor")) == 8
 
     # The companion card resolves entities by translation_key (see
     # card/src/entities.ts); every platform must set it, including climate.

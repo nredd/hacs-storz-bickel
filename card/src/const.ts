@@ -12,6 +12,15 @@ export const EDITOR_TAG = "storz-bickel-card-editor";
 /** Custom element tag for the temperature dial subcomponent. */
 export const DIAL_TAG = "sb-temp-dial";
 
+/** Custom element tag for the dual seven-segment temperature readout. */
+export const SEVEN_SEGMENT_TAG = "sb-seven-segment";
+
+/** Custom element tag for the temperature history line chart. */
+export const HISTORY_CHART_TAG = "sb-history-chart";
+
+/** Custom element tag for the sessions-per-day bar chart. */
+export const SESSIONS_CHART_TAG = "sb-sessions-chart";
+
 /** Integration domain whose entities the card binds to. */
 export const INTEGRATION_DOMAIN = "storz_bickel";
 

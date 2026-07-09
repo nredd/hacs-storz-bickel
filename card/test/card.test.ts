@@ -36,15 +36,15 @@ describe("setConfig", () => {
 });
 
 describe("capability-driven rendering", () => {
-  test("Volcano shows the pump bar and no battery chip", async () => {
+  test("Volcano shows the AIR toggle and no battery chip", async () => {
     const card = await renderCard(makeHass(), config(VOLCANO_DEVICE));
-    expect(card.shadowRoot?.querySelector(".pump")).not.toBeNull();
+    expect(card.shadowRoot?.querySelector(".air-btn")).not.toBeNull();
     expect(card.shadowRoot?.querySelector(".battery")).toBeNull();
   });
 
-  test("Crafty shows the battery chip and no pump bar", async () => {
+  test("Crafty shows the battery chip and no AIR toggle", async () => {
     const card = await renderCard(makeHass(), config(CRAFTY_DEVICE));
-    expect(card.shadowRoot?.querySelector(".pump")).toBeNull();
+    expect(card.shadowRoot?.querySelector(".air-btn")).toBeNull();
     expect(card.shadowRoot?.querySelector(".battery")?.textContent).toContain("87%");
   });
 
@@ -57,7 +57,7 @@ describe("capability-driven rendering", () => {
     expect(named.shadowRoot?.querySelector(".name")?.textContent).toBe("Bedside");
   });
 
-  test("disconnected device dims controls and flips the header dot", async () => {
+  test("disconnected device dims controls and flips the connection chip", async () => {
     const hass = makeHass();
     const connection = hass.states["binary_sensor.volcano_connection"];
     if (connection) {
@@ -65,7 +65,7 @@ describe("capability-driven rendering", () => {
     }
     const card = await renderCard(hass, config(VOLCANO_DEVICE));
     expect(card.shadowRoot?.querySelector(".body")?.classList.contains("disconnected")).toBe(true);
-    expect(card.shadowRoot?.querySelector(".dot.disconnected")).not.toBeNull();
+    expect(card.shadowRoot?.querySelector(".connection-chip.off")).not.toBeNull();
   });
 });
 
@@ -90,10 +90,10 @@ describe("presets", () => {
 });
 
 describe("heat and pump controls", () => {
-  test("heat pill toggles hvac mode off when heating", async () => {
+  test("HEAT toggle sets hvac mode off when heating", async () => {
     const hass = makeHass();
     const card = await renderCard(hass, config(VOLCANO_DEVICE));
-    (card.shadowRoot?.querySelector(".heat") as HTMLButtonElement).click();
+    (card.shadowRoot?.querySelector(".heat-btn") as HTMLButtonElement).click();
     expect(hass.serviceCalls).toEqual([
       {
         domain: "climate",
@@ -103,10 +103,10 @@ describe("heat and pump controls", () => {
     ]);
   });
 
-  test("pump bar turns the pump switch on", async () => {
+  test("AIR toggle turns the pump switch on", async () => {
     const hass = makeHass();
     const card = await renderCard(hass, config(VOLCANO_DEVICE));
-    (card.shadowRoot?.querySelector(".pump") as HTMLButtonElement).click();
+    (card.shadowRoot?.querySelector(".air-btn") as HTMLButtonElement).click();
     expect(hass.serviceCalls).toEqual([
       {
         domain: "switch",
@@ -117,20 +117,16 @@ describe("heat and pump controls", () => {
   });
 });
 
-describe("dial steppers", () => {
+describe("stepper buttons", () => {
   test("rapid taps debounce into a single set_temperature call", async () => {
     const hass = makeHass();
     const card = await renderCard(hass, config(VOLCANO_DEVICE));
     card.debounceMs = 20;
-    const dial = card.shadowRoot?.querySelector("sb-temp-dial");
-    const step = (direction: number) =>
-      dial?.dispatchEvent(
-        new CustomEvent("dial-step", { detail: { direction }, bubbles: true, composed: true }),
-      );
+    const plus = card.shadowRoot?.querySelector(".step.plus") as HTMLButtonElement;
 
-    step(1);
-    step(1);
-    step(1);
+    plus.click();
+    plus.click();
+    plus.click();
     expect(hass.serviceCalls).toHaveLength(0);
 
     await sleep(60);
@@ -152,13 +148,30 @@ describe("dial steppers", () => {
     }
     const card = await renderCard(hass, config(VOLCANO_DEVICE));
     card.debounceMs = 20;
+    (card.shadowRoot?.querySelector(".step.plus") as HTMLButtonElement).click();
+    await sleep(60);
+    expect(hass.serviceCalls[0]?.data.temperature).toBe(230);
+  });
+});
+
+describe("dial drag", () => {
+  test("dragging the dial debounces into a single set_temperature call", async () => {
+    const hass = makeHass();
+    const card = await renderCard(hass, config(VOLCANO_DEVICE));
+    card.debounceMs = 20;
     card.shadowRoot
       ?.querySelector("sb-temp-dial")
       ?.dispatchEvent(
-        new CustomEvent("dial-step", { detail: { direction: 1 }, bubbles: true, composed: true }),
+        new CustomEvent("dial-drag", { detail: { value: 200 }, bubbles: true, composed: true }),
       );
     await sleep(60);
-    expect(hass.serviceCalls[0]?.data.temperature).toBe(230);
+    expect(hass.serviceCalls).toEqual([
+      {
+        domain: "climate",
+        service: "set_temperature",
+        data: { entity_id: "climate.renamed_by_user", temperature: 200 },
+      },
+    ]);
   });
 });
 
@@ -191,6 +204,149 @@ describe("settings", () => {
         domain: "switch",
         service: "turn_off",
         data: { entity_id: "switch.crafty_vibration" },
+      },
+    ]);
+  });
+});
+
+describe("session panel", () => {
+  test("shows a live elapsed-time readout while a session is open", async () => {
+    const hass = makeHass();
+    const start = hass.states["sensor.volcano_current_session_start"];
+    if (start) {
+      start.state = new Date(Date.now() - 65_000).toISOString();
+    }
+    const card = await renderCard(hass, config(VOLCANO_DEVICE));
+    const timerText = card.shadowRoot?.querySelector(".session-timer")?.textContent?.trim();
+    // ~65s elapsed -> "1:0X" (a couple seconds of slack for test execution time).
+    expect(timerText).toMatch(/^1:0[3-7]$/);
+  });
+
+  test("shows a placeholder when no session is open", async () => {
+    const hass = makeHass();
+    const start = hass.states["sensor.volcano_current_session_start"];
+    if (start) {
+      start.state = "unknown";
+    }
+    const card = await renderCard(hass, config(VOLCANO_DEVICE));
+    expect(card.shadowRoot?.querySelector(".session-timer")?.textContent?.trim()).toBe("—:—");
+  });
+
+  test("sessions-today count reflects today's bucket in daily_counts", async () => {
+    const hass = makeHass();
+    const history = hass.states["sensor.volcano_session_history"];
+    const today = new Date().toISOString().slice(0, 10);
+    if (history) {
+      history.attributes.daily_counts = { [today]: 4, "2020-01-01": 9 };
+    }
+    const card = await renderCard(hass, config(VOLCANO_DEVICE));
+    expect(card.shadowRoot?.querySelector(".sessions-today-count")?.textContent).toBe("4");
+  });
+});
+
+describe("sessions chart wiring", () => {
+  test("passes the session_history sensor's daily_counts through to sb-sessions-chart", async () => {
+    const hass = makeHass();
+    const card = await renderCard(hass, config(VOLCANO_DEVICE));
+    const chart = card.shadowRoot?.querySelector("sb-sessions-chart") as
+      | (HTMLElement & { dailyCounts: Record<string, number> })
+      | null;
+    expect(chart?.dailyCounts).toEqual({ "2026-07-09": 3, "2026-07-08": 2, "2026-07-07": 1 });
+  });
+});
+
+describe("device info panel", () => {
+  test("shows total runtime and firmware version", async () => {
+    const hass = makeHass();
+    const card = await renderCard(hass, config(VOLCANO_DEVICE));
+    const rows = [...(card.shadowRoot?.querySelectorAll(".info-row") ?? [])].map(
+      (row) => row.textContent,
+    );
+    expect(rows.some((text) => text?.includes("Total runtime") && text.includes("2217.2 h"))).toBe(
+      true,
+    );
+    expect(rows.some((text) => text?.includes("Firmware") && text.includes("1.2.3"))).toBe(true);
+  });
+
+  test("shows Bluetooth firmware when available", async () => {
+    const hass = makeHass();
+    hass.entities["sensor.volcano_ble_firmware_version"] = {
+      entity_id: "sensor.volcano_ble_firmware_version",
+      device_id: VOLCANO_DEVICE,
+      platform: "storz_bickel",
+      translation_key: "ble_firmware_version",
+    };
+    hass.states["sensor.volcano_ble_firmware_version"] = {
+      entity_id: "sensor.volcano_ble_firmware_version",
+      state: "1.4.2",
+      attributes: {},
+    };
+    const card = await renderCard(hass, config(VOLCANO_DEVICE));
+    const rows = [...(card.shadowRoot?.querySelectorAll(".info-row") ?? [])].map(
+      (row) => row.textContent,
+    );
+    expect(
+      rows.some((text) => text?.includes("Bluetooth firmware") && text.includes("1.4.2")),
+    ).toBe(true);
+  });
+
+  test("hides Bluetooth firmware when the sensor is unavailable", async () => {
+    const hass = makeHass();
+    hass.entities["sensor.volcano_ble_firmware_version"] = {
+      entity_id: "sensor.volcano_ble_firmware_version",
+      device_id: VOLCANO_DEVICE,
+      platform: "storz_bickel",
+      translation_key: "ble_firmware_version",
+    };
+    hass.states["sensor.volcano_ble_firmware_version"] = {
+      entity_id: "sensor.volcano_ble_firmware_version",
+      state: "unavailable",
+      attributes: {},
+    };
+    const card = await renderCard(hass, config(VOLCANO_DEVICE));
+    const rows = [...(card.shadowRoot?.querySelectorAll(".info-row") ?? [])].map(
+      (row) => row.textContent,
+    );
+    expect(rows.some((text) => text?.includes("Bluetooth firmware"))).toBe(false);
+  });
+
+  test("pump failsafe dropdown reflects the current value and writes on change", async () => {
+    const hass = makeHass();
+    const card = await renderCard(hass, config(VOLCANO_DEVICE));
+    const selects = [
+      ...(card.shadowRoot?.querySelectorAll(".panel select") ?? []),
+    ] as HTMLSelectElement[];
+    // Render order: auto shutoff, pump failsafe, pump cooldown, temp step.
+    const failsafeSelect = selects[1] as HTMLSelectElement;
+    expect(failsafeSelect.querySelector("option[selected]")?.getAttribute("value")).toBe("45");
+
+    failsafeSelect.value = "90";
+    failsafeSelect.dispatchEvent(new Event("change"));
+    expect(hass.serviceCalls).toEqual([
+      {
+        domain: "number",
+        service: "set_value",
+        data: { entity_id: "number.volcano_pump_failsafe_seconds", value: 90 },
+      },
+    ]);
+  });
+
+  test("temp step dropdown reflects the current value and writes on change", async () => {
+    const hass = makeHass();
+    const card = await renderCard(hass, config(VOLCANO_DEVICE));
+    const selects = [
+      ...(card.shadowRoot?.querySelectorAll(".panel select") ?? []),
+    ] as HTMLSelectElement[];
+    const tempStepSelect = selects[3] as HTMLSelectElement;
+    expect(tempStepSelect.querySelector("option[selected]")?.getAttribute("value")).toBe("1");
+
+    tempStepSelect.value = "2.5";
+    tempStepSelect.dispatchEvent(new Event("change"));
+    expect(hass.serviceCalls).toEqual([
+      {
+        domain: "number",
+        service: "set_value",
+        data: { entity_id: "number.volcano_temp_step", value: 2.5 },
       },
     ]);
   });

@@ -89,4 +89,26 @@ describe("editor round-trip", () => {
     );
     expect(received).toEqual({ type: "custom:storz-bickel-card", device: VOLCANO_DEVICE });
   });
+
+  test("value-changed before setConfig is a no-op (config guard)", () => {
+    const editor = document.createElement("storz-bickel-card-editor") as StorzBickelCardEditor;
+    let received: CardConfig | undefined;
+    editor.addEventListener("config-changed", (event) => {
+      received = (event as CustomEvent<{ config: CardConfig }>).detail.config;
+    });
+
+    const handleValueChanged = (
+      editor as unknown as Record<
+        "handleValueChanged",
+        (event: CustomEvent<{ value: Record<string, unknown> }>) => void
+      >
+    ).handleValueChanged.bind(editor);
+
+    expect(() =>
+      handleValueChanged(
+        new CustomEvent("value-changed", { detail: { value: { device: VOLCANO_DEVICE } } }),
+      ),
+    ).not.toThrow();
+    expect(received).toBeUndefined();
+  });
 });
