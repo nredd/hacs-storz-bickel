@@ -106,6 +106,11 @@ class SessionTracker:
         return dt_util.parse_datetime(self.sessions[-1].stop)
 
     @property
+    def current_session_start(self) -> datetime | None:
+        """Return the start time of the currently open window, if any."""
+        return self._window_start
+
+    @property
     def favorite_temperature_celsius(self) -> float | None:
         """Return the mode of each session's own modal setpoint, in Celsius."""
         if not self.sessions:

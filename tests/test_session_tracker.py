@@ -75,6 +75,27 @@ async def test_session_start_and_finalize(
     assert tracker.sessions[0].pump_seconds == pytest.approx(6.0, abs=0.5)
 
 
+async def test_current_session_start_tracks_open_window(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory
+) -> None:
+    """current_session_start is set while a window is open, then clears."""
+    device = _stub_device(capabilities_for(DeviceType.VOLCANO))
+    tracker = await _make_tracker(hass, device)
+
+    assert tracker.current_session_start is None
+
+    tracker.handle_state(_state(heater_on=True, pump_on=True))
+    assert tracker.current_session_start is not None
+
+    await _elapse(hass, freezer, 6)
+    tracker.handle_state(_state(heater_on=True, pump_on=False))
+    await _elapse(hass, freezer, 120)
+    tracker.handle_state(_state(heater_on=False, pump_on=False))
+    await _elapse(hass, freezer, 901)
+
+    assert tracker.current_session_start is None
+
+
 async def test_minimum_duration_rejects_short_window(
     hass: HomeAssistant, freezer: FrozenDateTimeFactory
 ) -> None:

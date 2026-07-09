@@ -81,6 +81,40 @@ async def test_session_sensors_populate_after_qualifying_session(
     assert history is not None
     assert history.state == "1"
     assert len(history.attributes["sessions"]) == 1
+    assert sum(history.attributes["daily_counts"].values()) == 1
+
+
+async def test_current_session_start_reflects_open_window(
+    hass: HomeAssistant,
+    setup_entry: Callable[..., Awaitable[MockConfigEntry]],
+    fake_device: FakeDevice,
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    """current_session_start is set while a window is open, then clears."""
+    await setup_entry()
+
+    current_session = hass.states.get(
+        _entity_id(hass, fake_device, "current_session_start")
+    )
+    assert current_session is not None
+    assert current_session.state in ("unknown", "unavailable", "none")
+
+    await fake_device.async_set_heater(on=True)
+    await hass.async_block_till_done()
+
+    current_session = hass.states.get(
+        _entity_id(hass, fake_device, "current_session_start")
+    )
+    assert current_session is not None
+    assert current_session.state not in ("unknown", "unavailable", "none")
+
+    await _run_qualifying_session(hass, freezer, fake_device)
+
+    current_session = hass.states.get(
+        _entity_id(hass, fake_device, "current_session_start")
+    )
+    assert current_session is not None
+    assert current_session.state in ("unknown", "unavailable", "none")
 
 
 async def test_favorite_temperature_unit_conversion(

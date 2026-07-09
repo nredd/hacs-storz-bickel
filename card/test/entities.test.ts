@@ -13,6 +13,18 @@ describe("deviceEntities", () => {
     expect(ids.autoShutoffMinutes).toBe("number.volcano_auto_shutoff_minutes");
   });
 
+  test("resolves session and device-info entities", () => {
+    const ids = deviceEntities(makeHass(), VOLCANO_DEVICE);
+    expect(ids.currentSessionStart).toBe("sensor.volcano_current_session_start");
+    expect(ids.sessionHistory).toBe("sensor.volcano_session_history");
+    expect(ids.totalSessions).toBe("sensor.volcano_total_sessions");
+    expect(ids.favoriteTemperature).toBe("sensor.volcano_favorite_temperature");
+    expect(ids.totalRuntime).toBe("sensor.volcano_total_runtime");
+    expect(ids.pumpFailsafeSeconds).toBe("number.volcano_pump_failsafe_seconds");
+    expect(ids.pumpCooldownSeconds).toBe("number.volcano_pump_cooldown_seconds");
+    expect(ids.tempStep).toBe("number.volcano_temp_step");
+  });
+
   test("capability detection: Volcano has no battery, boost, or vibration", () => {
     const ids = deviceEntities(makeHass(), VOLCANO_DEVICE);
     expect(ids.battery).toBeUndefined();
