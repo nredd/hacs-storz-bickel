@@ -47,3 +47,14 @@ PARALLEL_UPDATES = 0
 # Active-connection poll cadence (seconds). Heat/pump state arrives via BLE
 # notifications; the current temperature is read on this interval.
 POLL_INTERVAL_SECONDS = 3
+
+# Session tracking: a heater-on window (optionally spanning brief off gaps) that
+# qualifies as a tracked "session" once it meets the minimum duration and, for
+# pump-capable devices, has run the pump continuously for the qualifying window.
+SESSION_MIN_DURATION_SECONDS = 120
+SESSION_PUMP_QUALIFY_SECONDS = 5
+SESSION_HEATER_OFF_TIMEOUT_SECONDS = 900
+SESSION_SETPOINT_ROUND_NDIGITS = 0
+SESSION_HISTORY_ATTRIBUTE_WINDOW_HOURS = 48
+SESSION_STORAGE_VERSION = 1
+SESSION_STORAGE_KEY_PREFIX = f"{DOMAIN}_sessions"
