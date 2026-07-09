@@ -6,7 +6,13 @@
         "description": "Do you want to set up {name}?\n\nWhile Home Assistant is connected, the Storz & Bickel app cannot connect to this device at the same time."
       },
       "user": {
-        "description": "Select a Storz & Bickel device to set up. Make sure it is powered on, in range, and not connected to the Storz & Bickel app.",
+        "description": "Select a Storz & Bickel device to set up. Make sure it is powered on, in range, and not connected to the Storz & Bickel app.\n\nAlready have this device configured and just want to fix a disconnected entry? Use Reload on the existing entry instead of deleting it — reconnection is automatic. Deleting and re-adding requires Home Assistant's Bluetooth stack to rediscover the device from scratch, which can take a few minutes.",
+        "data": {
+          "address": "Device"
+        }
+      },
+      "reconfigure": {
+        "description": "Select the Storz & Bickel device this entry should use. If the device is temporarily unresponsive, try Reload on the entry first — reconnection is automatic and does not require reconfiguring or deleting the entry.",
         "data": {
           "address": "Device"
         }
@@ -15,7 +21,8 @@
     "abort": {
       "already_configured": "This device is already configured",
       "no_devices_found": "No Storz & Bickel devices found nearby. Make sure the device is on, in range, and not connected to another app.",
-      "not_supported": "This device is not a supported Storz & Bickel vaporizer"
+      "not_supported": "This device is not a supported Storz & Bickel vaporizer",
+      "reconfigure_successful": "Reconfiguration was successful"
     }
   },
   "options": {
