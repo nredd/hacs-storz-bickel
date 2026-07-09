@@ -56,7 +56,10 @@
     "number": {
       "led_brightness": { "name": "Display brightness" },
       "auto_shutoff_minutes": { "name": "Auto shutoff timer" },
-      "boost_temperature": { "name": "Boost temperature" }
+      "boost_temperature": { "name": "Boost temperature" },
+      "pump_failsafe_seconds": { "name": "Pump failsafe window" },
+      "pump_cooldown_seconds": { "name": "Pump cooldown duration" },
+      "temp_step": { "name": "Temperature step" }
     },
     "sensor": {
       "temperature": { "name": "Temperature" },
@@ -70,6 +73,7 @@
       "firmware_version": { "name": "Firmware version" },
       "ble_firmware_version": { "name": "Bluetooth firmware version" },
       "last_session": { "name": "Last session" },
+      "current_session_start": { "name": "Current session start" },
       "total_sessions": { "name": "Total sessions" },
       "total_pump_time": { "name": "Total pump time" },
       "favorite_temperature": { "name": "Favorite temperature" },

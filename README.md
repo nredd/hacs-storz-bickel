@@ -45,14 +45,19 @@ presets: [175, 185, 195]   # optional preset temperature chips
 name: Volcano              # optional title override
 ```
 
-The card is a thermostat-style dial with the current temperature as an animated arc (amber while
-heating, green at target), −/+ steppers, a heat pill, preset chips, and a pump bar with an airflow
-shimmer while running. It adapts to the configured device: the pump bar appears only on the
-Volcano, the battery chip only on portables, and boost/vibration rows only where supported. Entity
-lookups go through the registry, so renaming entities never breaks the card.
+The card is a two-column dashboard: a dual current/target temperature readout with a °F/°C toggle,
+a rotating-knob thermostat dial (drag it, or use the −/+ stepper), preset chips, and HEAT/AIR
+toggle buttons on the left; a live session timer with today's session count, a temperature history
+chart, a sessions-per-day chart, and a device-info panel (runtime, firmware, and dropdowns for
+auto-shutoff, pump failsafe, pump cooldown, and temperature step) on the right. It reflows to a
+single column in narrow dashboard slots. The card adapts to the configured device: the AIR toggle
+appears only on the Volcano, the battery chip only on portables, and boost/vibration rows only
+where supported. Entity lookups go through the registry, so renaming entities never breaks the
+card.
 
-> **Auto-shutoff display.** The card shows the configured auto-shutoff minutes; the devices do not
-> expose a live ticking countdown.
+> **Reconnects on pump/step changes.** The pump failsafe, pump cooldown, and temperature-step
+> dropdowns configure integration behavior (not the physical device), so changing one reloads the
+> config entry — a brief BLE reconnect, the same as changing them via the integration's options.
 
 ## Requirements
 

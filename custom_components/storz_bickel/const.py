@@ -31,6 +31,11 @@ DEFAULT_PUMP_COOLDOWN_SECONDS = 5
 CONF_TEMPERATURE_UNIT = "temperature_unit"
 DEFAULT_TEMPERATURE_UNIT = UnitOfTemperature.CELSIUS
 
+# Config entry option key for the climate entity's target-temperature step,
+# independent of any fixed per-device-type default (see api/devices/base.py).
+CONF_TEMP_STEP = "temp_step"
+DEFAULT_TEMP_STEP = 1.0
+
 # Bounds how long a workflow will wait for a temperature rung to be reached
 # before giving up (generous enough for a cold start to 170C, still bounds a
 # stalled/disconnected device).
@@ -56,5 +61,6 @@ SESSION_PUMP_QUALIFY_SECONDS = 5
 SESSION_HEATER_OFF_TIMEOUT_SECONDS = 900
 SESSION_SETPOINT_ROUND_NDIGITS = 0
 SESSION_HISTORY_ATTRIBUTE_WINDOW_HOURS = 48
+SESSION_DAILY_BUCKET_DAYS = 14
 SESSION_STORAGE_VERSION = 1
 SESSION_STORAGE_KEY_PREFIX = f"{DOMAIN}_sessions"
