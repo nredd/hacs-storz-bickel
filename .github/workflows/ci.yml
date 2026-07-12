@@ -2,8 +2,7 @@ name: CI
 
 # Single CI workflow for the integration. Combines what used to live in
 # ci.yml + validate.yml + ha-version-sync-check.yml:
-#   * smoke           lint + type + test + card gate, run INSIDE the real devcontainer
-#                     image (script/smoke covers the Lovelace card via script/card-check)
+#   * smoke           lint + type + test, run INSIDE the real devcontainer image
 #   * hassfest        Home Assistant integration manifest validation
 #   * hacs            HACS repository validation
 #
@@ -41,16 +40,6 @@ jobs:
       - name: Set up Docker Buildx
         # docker-container driver is required for the GHA cache backend used below.
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
-
-      - name: Restore card Bun dependencies
-        # card/node_modules lives on the bind-mounted workspace (unlike the
-        # ha_venv/uv_cache named volumes below), so a plain cache works directly.
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: card/node_modules
-          key: bun-modules-${{ runner.os }}-${{ hashFiles('card/bun.lock') }}
-          restore-keys: |
-            bun-modules-${{ runner.os }}-
 
       - name: Restore uv package cache
         # UV_CACHE_DIR lives in a named Docker volume, not a host path, so we

@@ -38,9 +38,6 @@ dev = [
     "aiousbwatcher>=1.1.1",
     "serialx",
     "aioesphomeapi",
-    # The integration declares a `frontend` dependency (bundled Lovelace card), so
-    # tests set up the real frontend component, which imports hass_frontend.
-    "home-assistant-frontend",
     "ruff>=0.15.0",
     "ty>=0.0.51",
     "codespell>=2.4.1",
@@ -179,7 +176,7 @@ keep-runtime-typing = true
 # --------------------------------------------------------------------------- #
 [tool.codespell]
 ignore-words-list = "aiport,astroid,checkin,currenty,hass,iif,incomfort,lookin,nam,NotIn"
-skip = "./.*,*.csv,*.json,*.ambr,uv.lock,bun.lock,node_modules,./custom_components/storz_bickel/www"
+skip = "./.*,*.csv,*.json,*.ambr,uv.lock"
 quiet-level = 2
 
 # --------------------------------------------------------------------------- #

@@ -12,7 +12,7 @@ class Session:
 
     Timestamps are ISO 8601 UTC strings (not ``datetime``) so the record is
     directly JSON-serializable for both the persisted store and entity
-    attributes exposed to the Lovelace card. Setpoint statistics are in
+    attributes exposed for dashboard consumption. Setpoint statistics are in
     degrees Celsius; convert to a display unit only at the entity layer.
     """
 

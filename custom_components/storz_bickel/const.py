@@ -41,11 +41,6 @@ DEFAULT_TEMP_STEP = 1.0
 # stalled/disconnected device).
 WORKFLOW_TEMPERATURE_WAIT_TIMEOUT_SECONDS = 600
 
-# Bundled Lovelace card, served by the integration and injected into the
-# frontend on setup (see async_setup in __init__.py).
-CARD_FILENAME = "storz-bickel-card.js"
-CARD_URL = f"/{DOMAIN}/{CARD_FILENAME}"
-
 # Entities are updated from a single coordinator; serialize platform updates.
 PARALLEL_UPDATES = 0
 

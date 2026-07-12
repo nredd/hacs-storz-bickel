@@ -156,8 +156,8 @@ class StorzBickelFavoriteTemperatureSensor(StorzBickelEntity, SensorEntity):
 class StorzBickelSessionHistorySensor(StorzBickelEntity, SensorEntity):
     """Lifetime session count, with recent sessions exposed as attributes.
 
-    The ``sessions`` attribute is the data source for the companion Lovelace
-    card's live visualization: a plain JSON list of recent session records.
+    The ``sessions`` attribute is a plain JSON list of recent session records,
+    intended as a data source for dashboard visualizations.
     """
 
     _attr_state_class = SensorStateClass.TOTAL_INCREASING
@@ -186,8 +186,8 @@ class StorzBickelSessionHistorySensor(StorzBickelEntity, SensorEntity):
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return recent sessions and a trailing daily-count breakdown.
 
-        ``sessions`` is capped to a short rolling window for the card's live
-        view; ``daily_counts`` instead buckets the tracker's full in-memory
+        ``sessions`` is capped to a short rolling window for live dashboard
+        views; ``daily_counts`` instead buckets the tracker's full in-memory
         lifetime list (unbounded, see :class:`SessionStore`) by local date so
         a "sessions per day" chart isn't limited by the same window.
         """
