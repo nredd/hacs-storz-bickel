@@ -31,34 +31,6 @@ Supported devices:
 See [`docs/user/`](docs/user/GETTING_STARTED.md) for setup, the full per-model entity table, and
 automation/dashboard examples.
 
-## Companion Lovelace card
-
-The integration bundles a custom dashboard card — no extra HACS install, no manual resource
-registration. Once the integration is set up, open any dashboard, **Add card**, and search for
-**Storz & Bickel Card**. The visual editor lets you pick the device and preset temperatures; the
-equivalent YAML is:
-
-```yaml
-type: custom:storz-bickel-card
-device: <device_id>        # pick via the visual editor
-presets: [175, 185, 195]   # optional preset temperature chips
-name: Volcano              # optional title override
-```
-
-The card is a two-column dashboard: a dual current/target temperature readout with a °F/°C toggle,
-a rotating-knob thermostat dial (drag it, or use the −/+ stepper), preset chips, and HEAT/AIR
-toggle buttons on the left; a live session timer with today's session count, a temperature history
-chart, a sessions-per-day chart, and a device-info panel (runtime, firmware, and dropdowns for
-auto-shutoff, pump failsafe, pump cooldown, and temperature step) on the right. It reflows to a
-single column in narrow dashboard slots. The card adapts to the configured device: the AIR toggle
-appears only on the Volcano, the battery chip only on portables, and boost/vibration rows only
-where supported. Entity lookups go through the registry, so renaming entities never breaks the
-card.
-
-> **Reconnects on pump/step changes.** The pump failsafe, pump cooldown, and temperature-step
-> dropdowns configure integration behavior (not the physical device), so changing one reloads the
-> config entry — a brief BLE reconnect, the same as changing them via the integration's options.
-
 ## Requirements
 
 - Home Assistant with a working Bluetooth adapter (e.g. Raspberry Pi 5 built-in Bluetooth) or an
@@ -89,6 +61,10 @@ _Discovered_ notification you can configure in one click. You can also add it ma
 **Settings → Devices & Services → Add Integration → Storz & Bickel** and pick it from the list of
 nearby devices.
 
+> **Reconnects on pump/step changes.** The pump failsafe, pump cooldown, and temperature-step
+> options configure integration behavior (not the physical device), so changing one reloads the
+> config entry — a brief BLE reconnect.
+
 ## Development
 
 This project uses the [Astral](https://astral.sh) toolchain (`uv`, `ruff`, `ty`); `pyproject.toml`
@@ -107,17 +83,6 @@ uv run pytest                # tests
 so local development and CI share one environment. Open the repo in the devcontainer (VS Code /
 Codespaces) to get the same toolchain.
 
-The companion card (`card/`) has its own toolchain — [Bun](https://bun.sh) for install/build/test
-and [Biome](https://biomejs.dev) for lint/format, the TypeScript analogues of `uv`/`ruff`. The
-built bundle is **committed** at `custom_components/storz_bickel/www/storz-bickel-card.js` so HACS
-ships it; rebuild and commit it with any `card/src` change (CI's `Smoke` job fails on drift).
-See [`docs/development/CARD.md`](docs/development/CARD.md).
-
-```bash
-script/card-check   # full gate: Biome + tsc + bun test + build + drift check
-script/card         # rebuild the bundle after editing card/src
-```
-
 ### Live BLE check (host-only)
 
 `tests/live_ble.py` is a real-hardware check: it scans for a nearby Storz & Bickel device, connects
@@ -135,6 +100,13 @@ onto the BlueZ backend and breaks real CoreBluetooth scanning on macOS. Running 
 real platform backend. `uv` auto-syncs the normal project env. With no device in range it exits 0
 (clean skip); it exits non-zero only if a device is found but the connect/read fails. On macOS, grant
 your terminal/IDE the Bluetooth permission on first run.
+
+## See also
+
+This integration no longer bundles or auto-serves a Lovelace dashboard card. The companion card
+now lives in its own HACS repository,
+[`nredd/hacs-storz-bickel-card`](https://github.com/nredd/hacs-storz-bickel-card) — install it
+separately (category: _Plugin_) if you want the custom `storz-bickel-card` dashboard card.
 
 ## Attribution
 

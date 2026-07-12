@@ -40,8 +40,8 @@ async def test_setup_creates_entities(
     # sensors exist but are disabled by default.
     assert len(hass.states.async_all("sensor")) == 8
 
-    # The companion card resolves entities by translation_key (see
-    # card/src/entities.ts); every platform must set it, including climate.
+    # Dashboard consumers (e.g. the companion Lovelace card) resolve entities by
+    # translation_key; every platform must set it, including climate.
     registry = er.async_get(hass)
     climate_entry = registry.async_get(climate_states[0].entity_id)
     assert climate_entry is not None

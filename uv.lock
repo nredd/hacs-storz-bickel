@@ -1124,15 +1124,6 @@ wheels = [
 ]
 
 [[package]]
-name = "home-assistant-frontend"
-version = "20260624.4"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/e5/c0/cecfa8b188024085ab2f7d636039c684647c81e52371f98339b94fd57393/home_assistant_frontend-20260624.4.tar.gz", hash = "sha256:2e36e483da70ed4ed8834b419a52ded6f638b15e6039efa81434798ee80f32b0", size = 124410193, upload-time = "2026-07-03T11:45:06.135Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/93/88/391702b1af3e41218889fb858e6a3299c5e96b0d02e0fe2444e6516ce55b/home_assistant_frontend-20260624.4-py3-none-any.whl", hash = "sha256:982dfe046553f6c0e51e18f668d7aa87460c7a1137040013f127cc3902afe3f1", size = 124193048, upload-time = "2026-07-03T11:44:59.825Z" },
-]
-
-[[package]]
 name = "homeassistant"
 version = "2026.6.4"
 source = { registry = "https://pypi.org/simple" }
@@ -2442,7 +2433,6 @@ dev = [
     { name = "codespell" },
     { name = "colorlog" },
     { name = "conventional-pre-commit" },
-    { name = "home-assistant-frontend" },
     { name = "isal" },
     { name = "pytest-homeassistant-custom-component" },
     { name = "ruff" },
@@ -2461,7 +2451,6 @@ dev = [
     { name = "codespell", specifier = ">=2.4.1" },
     { name = "colorlog", specifier = "==6.10.1" },
     { name = "conventional-pre-commit", specifier = ">=3.0" },
-    { name = "home-assistant-frontend" },
     { name = "isal", specifier = "==1.8.0" },
     { name = "pytest-homeassistant-custom-component", specifier = ">=0.13.339" },
     { name = "ruff", specifier = ">=0.15.0" },

@@ -8,21 +8,16 @@ cloud or companion-app dependency.
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from homeassistant.components import bluetooth
-from homeassistant.components.frontend import add_extra_js_url
-from homeassistant.components.http import StaticPathConfig
 from homeassistant.const import CONF_ADDRESS, Platform
 from homeassistant.exceptions import ConfigEntryNotReady
 import homeassistant.helpers.config_validation as cv
-from homeassistant.loader import async_get_integration, async_get_loaded_integration
+from homeassistant.loader import async_get_loaded_integration
 
 from custom_components.storz_bickel.api import DeviceType, create_device
 from custom_components.storz_bickel.const import (
-    CARD_FILENAME,
-    CARD_URL,
     CONF_DEVICE_TYPE,
     DOMAIN,
     POLL_INTERVAL_SECONDS,
@@ -32,7 +27,6 @@ from custom_components.storz_bickel.data import StorzBickelData
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
-    from homeassistant.helpers.typing import ConfigType
 
     from custom_components.storz_bickel.data import StorzBickelConfigEntry
 
@@ -46,23 +40,6 @@ PLATFORMS: list[Platform] = [
 ]
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
-
-
-async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
-    """Register the bundled Lovelace card with the HTTP server and frontend.
-
-    Home Assistant calls this exactly once per run, when the component first
-    loads, so the card resource is registered a single time regardless of how
-    many devices are configured or how often entries reload.
-    """
-    integration = await async_get_integration(hass, DOMAIN)
-    card_path = Path(__file__).parent / "www" / CARD_FILENAME
-    # cache_headers=True is safe: the ?v= query below busts caches per release.
-    await hass.http.async_register_static_paths(
-        [StaticPathConfig(CARD_URL, str(card_path), cache_headers=True)]
-    )
-    add_extra_js_url(hass, f"{CARD_URL}?v={integration.version or '0'}")
-    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: StorzBickelConfigEntry) -> bool:
