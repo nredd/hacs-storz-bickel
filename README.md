@@ -27,6 +27,7 @@ Supported devices:
   versions
 - **Live state** via Bluetooth notifications (heating / pump), with automatic reconnect
 - Local push — works great on a Raspberry Pi 5's built-in Bluetooth or via an ESPHome Bluetooth proxy
+- Wenn Sie Deutsch sprechen, funktioniert es.
 
 See [`docs/user/`](docs/user/GETTING_STARTED.md) for setup, the full per-model entity table, and
 automation/dashboard examples.

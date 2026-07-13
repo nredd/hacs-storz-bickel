@@ -1,0 +1,102 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "bluetooth_confirm": {
+        "description": "Möchtest du {name} einrichten?\n\nWährend Home Assistant verbunden ist, kann sich die Storz & Bickel App nicht gleichzeitig mit diesem Gerät verbinden."
+      },
+      "user": {
+        "description": "Wähle ein Storz & Bickel Gerät zum Einrichten aus. Stelle sicher, dass es eingeschaltet und in Reichweite ist und nicht mit der Storz & Bickel App verbunden ist.\n\nDu hast dieses Gerät bereits konfiguriert und möchtest nur einen getrennten Eintrag reparieren? Verwende stattdessen „Neu laden“ beim bestehenden Eintrag — die Wiederverbindung erfolgt automatisch. Nach dem Löschen und erneuten Hinzufügen muss der Bluetooth-Stack von Home Assistant das Gerät komplett neu entdecken, was einige Minuten dauern kann.",
+        "data": {
+          "address": "Gerät"
+        }
+      },
+      "reconfigure": {
+        "description": "Wähle das Storz & Bickel Gerät aus, das dieser Eintrag verwenden soll. Wenn das Gerät vorübergehend nicht reagiert, versuche zuerst „Neu laden“ beim Eintrag — die Wiederverbindung erfolgt automatisch und erfordert weder eine Neukonfiguration noch das Löschen des Eintrags.",
+        "data": {
+          "address": "Gerät"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Dieses Gerät ist bereits konfiguriert",
+      "no_devices_found": "Keine Storz & Bickel Geräte in der Nähe gefunden. Stelle sicher, dass das Gerät eingeschaltet und in Reichweite ist und nicht mit einer anderen App verbunden ist.",
+      "not_supported": "Dieses Gerät ist kein unterstützter Storz & Bickel Verdampfer",
+      "reconfigure_successful": "Die Neukonfiguration war erfolgreich"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Geräteoptionen",
+        "data": {
+          "temperature_unit": "Temperatureinheit der Klima-Entität",
+          "pump_failsafe_enabled": "Pumpen-Failsafe",
+          "pump_failsafe_seconds": "Pumpen-Failsafe-Zeitfenster",
+          "pump_cooldown_enabled": "Pumpen-Abklingzeit",
+          "pump_cooldown_seconds": "Dauer der Pumpen-Abklingzeit"
+        },
+        "data_description": {
+          "temperature_unit": "Einheit, in der die Klima-Entität Temperaturen anzeigt — unabhängig vom Display des Geräts und der systemweiten Einheit von Home Assistant.",
+          "pump_failsafe_enabled": "Die Pumpe automatisch ausschalten, nachdem sie für die Dauer des Failsafe-Zeitfensters gelaufen ist.",
+          "pump_failsafe_seconds": "Wie lange die Pumpe laufen darf, bevor der Failsafe sie ausschaltet.",
+          "pump_cooldown_enabled": "Verhindern, dass die Pumpe direkt nach dem Ausschalten wieder eingeschaltet wird.",
+          "pump_cooldown_seconds": "Wie lange nach dem Ausschalten der Pumpe gewartet wird, bevor sie wieder eingeschaltet werden darf."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "pump_cooldown_active": {
+      "message": "Die Pumpe wurde gerade ausgeschaltet; warte noch {remaining} Sekunden, bevor du sie wieder einschaltest."
+    },
+    "workflow_already_running": {
+      "message": "Es läuft bereits ein Workflow; stoppe ihn, bevor du einen neuen startest."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "heater": { "name": "Aufheizen" },
+      "pump": { "name": "Pumpe" },
+      "connection": { "name": "Verbindung" }
+    },
+    "number": {
+      "led_brightness": { "name": "Displayhelligkeit" },
+      "auto_shutoff_minutes": { "name": "Timer für automatische Abschaltung" },
+      "boost_temperature": { "name": "Boost-Temperatur" },
+      "pump_failsafe_seconds": { "name": "Pumpen-Failsafe-Zeitfenster" },
+      "pump_cooldown_seconds": { "name": "Dauer der Pumpen-Abklingzeit" },
+      "temp_step": { "name": "Temperaturschritt" }
+    },
+    "sensor": {
+      "temperature": { "name": "Temperatur" },
+      "battery": { "name": "Akku" },
+      "total_runtime": { "name": "Gesamtlaufzeit" },
+      "hours_of_operation": { "name": "Betriebsstunden" },
+      "minutes_of_operation": { "name": "Betriebsminuten" },
+      "heater_runtime": { "name": "Heizungslaufzeit" },
+      "battery_charge_time": { "name": "Akku-Ladezeit" },
+      "serial_number": { "name": "Seriennummer" },
+      "firmware_version": { "name": "Firmware-Version" },
+      "ble_firmware_version": { "name": "Bluetooth-Firmware-Version" },
+      "last_session": { "name": "Letzte Session" },
+      "current_session_start": { "name": "Beginn der aktuellen Session" },
+      "total_sessions": { "name": "Sessions insgesamt" },
+      "total_pump_time": { "name": "Gesamte Pumpenlaufzeit" },
+      "favorite_temperature": { "name": "Lieblingstemperatur" },
+      "session_history": { "name": "Session-Verlauf" }
+    },
+    "switch": {
+      "heater": { "name": "Heizung" },
+      "pump": { "name": "Pumpe" },
+      "vibration": { "name": "Vibration" },
+      "auto_shutoff_enabled": { "name": "Automatische Abschaltung" },
+      "fahrenheit_display": { "name": "Fahrenheit-Anzeige" }
+    },
+    "button": {
+      "workflow_full_session": { "name": "Komplette Session" },
+      "workflow_fill_balloon": { "name": "Ballon füllen" },
+      "workflow_stop": { "name": "Workflow stoppen" }
+    }
+  }
+}
