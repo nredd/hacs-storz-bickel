@@ -30,6 +30,7 @@ def _flatten(node: object, prefix: str = "") -> dict[str, str]:
     assert isinstance(node, dict), f"unexpected node type at {prefix!r}"
     flat: dict[str, str] = {}
     for key, value in node.items():
+        assert isinstance(key, str), f"non-string key at {prefix!r}"
         flat.update(_flatten(value, f"{prefix}.{key}" if prefix else key))
     return flat
 
