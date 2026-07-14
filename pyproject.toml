@@ -176,7 +176,7 @@ keep-runtime-typing = true
 # --------------------------------------------------------------------------- #
 [tool.codespell]
 ignore-words-list = "aiport,astroid,checkin,currenty,hass,iif,incomfort,lookin,nam,NotIn"
-skip = "./.*,*.csv,*.json,*.ambr,uv.lock,*.md"
+skip = "./.*,*.csv,*.json,*.ambr,uv.lock"
 quiet-level = 2
 
 # --------------------------------------------------------------------------- #
