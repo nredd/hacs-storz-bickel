@@ -111,6 +111,18 @@ class SessionTracker:
         return self._window_start
 
     @property
+    def current_session_duration_seconds(self) -> float | None:
+        """Return the elapsed seconds of the currently open window, if any.
+
+        The window stays open across brief heater-off periods (the grace
+        timer), so this never resets on a heat toggle — it clears only when
+        the window finalizes or is discarded.
+        """
+        if self._window_start is None:
+            return None
+        return (dt_util.utcnow() - self._window_start).total_seconds()
+
+    @property
     def favorite_temperature_celsius(self) -> float | None:
         """Return the mode of each session's own modal setpoint, in Celsius."""
         if not self.sessions:
