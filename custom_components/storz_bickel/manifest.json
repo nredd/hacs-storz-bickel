@@ -2,23 +2,45 @@
   "domain": "storz_bickel",
   "name": "Storz & Bickel",
   "bluetooth": [
-    { "service_uuid": "10100000-5354-4f52-5a26-4249434b454c" },
-    { "service_uuid": "00000000-5354-4f52-5a26-4249434b454c" },
-    { "service_uuid": "00000001-4c45-4b43-4942-265a524f5453" },
-    { "local_name": "VOLCANO*" },
-    { "local_name": "S&B VOLCANO*" },
-    { "local_name": "VENTY*" },
-    { "local_name": "VEAZY*" },
-    { "local_name": "CRAFTY*" }
+    {
+      "service_uuid": "10100000-5354-4f52-5a26-4249434b454c"
+    },
+    {
+      "service_uuid": "00000000-5354-4f52-5a26-4249434b454c"
+    },
+    {
+      "service_uuid": "00000001-4c45-4b43-4942-265a524f5453"
+    },
+    {
+      "local_name": "VOLCANO*"
+    },
+    {
+      "local_name": "S&B VOLCANO*"
+    },
+    {
+      "local_name": "VENTY*"
+    },
+    {
+      "local_name": "VEAZY*"
+    },
+    {
+      "local_name": "CRAFTY*"
+    }
   ],
-  "codeowners": ["@nredd"],
+  "codeowners": [
+    "@nredd"
+  ],
   "config_flow": true,
-  "dependencies": ["bluetooth_adapters"],
+  "dependencies": [
+    "bluetooth_adapters"
+  ],
   "documentation": "https://github.com/nredd/hacs-storz-bickel",
   "integration_type": "device",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/nredd/hacs-storz-bickel/issues",
   "quality_scale": "silver",
-  "requirements": ["bleak-retry-connector>=3.6.0"],
-  "version": "1.0.0"
+  "requirements": [
+    "bleak-retry-connector>=3.6.0"
+  ],
+  "version": "1.0.1"
 }
