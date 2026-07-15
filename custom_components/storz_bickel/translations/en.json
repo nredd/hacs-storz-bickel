@@ -81,6 +81,7 @@
       "ble_firmware_version": { "name": "Bluetooth firmware version" },
       "last_session": { "name": "Last session" },
       "current_session_start": { "name": "Current session start" },
+      "current_session_duration": { "name": "Current session duration" },
       "total_sessions": { "name": "Total sessions" },
       "total_pump_time": { "name": "Total pump time" },
       "favorite_temperature": { "name": "Favorite temperature" },

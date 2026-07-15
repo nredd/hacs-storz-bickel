@@ -66,6 +66,19 @@ SESSION_SENSORS: tuple[StorzBickelSessionSensorEntityDescription, ...] = (
         icon="mdi:timer-play-outline",
         value_fn=lambda tracker: tracker.current_session_start,
     ),
+    # No state_class on purpose: the value resets to unknown between sessions
+    # (not TOTAL_INCREASING) and recording every ramp value as MEASUREMENT
+    # statistics would be noise. Updates at coordinator cadence, not 1 Hz —
+    # dashboards wanting a live tick should render ``current_session_start``.
+    StorzBickelSessionSensorEntityDescription(
+        key="current_session_duration",
+        translation_key="current_session_duration",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.SECONDS,
+        suggested_display_precision=0,
+        icon="mdi:timer-outline",
+        value_fn=lambda tracker: tracker.current_session_duration_seconds,
+    ),
     StorzBickelSessionSensorEntityDescription(
         key="total_pump_time",
         translation_key="total_pump_time",

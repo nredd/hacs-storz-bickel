@@ -117,6 +117,51 @@ async def test_current_session_start_reflects_open_window(
     assert current_session.state in ("unknown", "unavailable", "none")
 
 
+async def test_current_session_duration_survives_grace_toggle(
+    hass: HomeAssistant,
+    setup_entry: Callable[..., Awaitable[MockConfigEntry]],
+    fake_device: FakeDevice,
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    """Duration tracks the open window and does not reset on a heat toggle."""
+    await setup_entry()
+
+    duration = hass.states.get(_entity_id(hass, fake_device, "current_session_duration"))
+    assert duration is not None
+    assert duration.state in ("unknown", "unavailable", "none")
+
+    await fake_device.async_set_heater(on=True)
+    await hass.async_block_till_done()
+    await _elapse(hass, freezer, 60)
+    fake_device.fire()
+    await hass.async_block_till_done()
+
+    duration = hass.states.get(_entity_id(hass, fake_device, "current_session_duration"))
+    assert duration is not None
+    assert float(duration.state) == pytest.approx(60.0, abs=1.0)
+
+    # Heater off then back on within the 15-minute grace window: the same
+    # window resumes, so the duration keeps counting from the original start.
+    await fake_device.async_set_heater(on=False)
+    await hass.async_block_till_done()
+    await _elapse(hass, freezer, 60)
+    await fake_device.async_set_heater(on=True)
+    await hass.async_block_till_done()
+
+    duration = hass.states.get(_entity_id(hass, fake_device, "current_session_duration"))
+    assert duration is not None
+    assert float(duration.state) == pytest.approx(120.0, abs=1.0)
+
+    # Once the grace window expires the window closes and duration clears.
+    await fake_device.async_set_heater(on=False)
+    await hass.async_block_till_done()
+    await _elapse(hass, freezer, 901)
+
+    duration = hass.states.get(_entity_id(hass, fake_device, "current_session_duration"))
+    assert duration is not None
+    assert duration.state in ("unknown", "unavailable", "none")
+
+
 async def test_favorite_temperature_unit_conversion(
     hass: HomeAssistant,
     setup_entry: Callable[..., Awaitable[MockConfigEntry]],
