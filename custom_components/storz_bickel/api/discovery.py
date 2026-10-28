@@ -34,7 +34,7 @@ def detect_device_type(
         return DeviceType.VOLCANO
     if "VEAZY" in upper:
         return DeviceType.VEAZY
-    if "VENTY" in upper:
+    if "VENTY" in upper or upper.startswith("S&B VY"):
         return DeviceType.VENTY
     if "CRAFTY" in upper or c.CRAFTY_SERVICE_DATA in uuids:
         return DeviceType.CRAFTY
